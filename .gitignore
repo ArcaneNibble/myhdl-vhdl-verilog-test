@@ -1,3 +1,7 @@
 *.vcd*
 
+*.o
+*.elf
+*.bin
+
 navre

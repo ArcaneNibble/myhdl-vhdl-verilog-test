@@ -1,3 +1,4 @@
+import binascii
 import os
 
 from myhdl import *
@@ -24,6 +25,18 @@ def Toplevel(clk,
     @always(clkhalfperiod)
     def clk_gen():
         clk.next = not clk
+
+    # Assembling the AVR assembly code
+    def assemble_avr(fn):
+        os.system("avr-as -o {0}.o {0}.s".format(fn))
+        os.system("avr-gcc -o {0}.elf -Wl,--section-start=.text=0 -nostartfiles {0}.o".format(fn))
+        os.system("avr-objcopy -O binary {0}.elf {0}.bin".format(fn))
+
+        f = open("{0}.bin".format(fn), 'rb')
+        data = f.read()
+        f.close()
+        return data
+    print binascii.hexlify(assemble_avr("avrcode"))
 
     # Reset generator (temp)
     @instance
