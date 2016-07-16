@@ -1,0 +1,3 @@
+Test interaction between MyHDL, VHDL, and Verilog in cosimulation. VHDL uses
+GHDL and Verilog uses Icarus. The system is a J2 CPU + Navre AVR CPU. It is not
+intended to be useful or synthesizable.
