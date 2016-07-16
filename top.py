@@ -1,5 +1,6 @@
 import binascii
 import os
+import sys
 
 from myhdl import *
 
@@ -36,7 +37,36 @@ def Toplevel(clk,
         data = f.read()
         f.close()
         return data
-    print binascii.hexlify(assemble_avr("avrcode"))
+    avrcode = assemble_avr("avrcode")
+
+    # AVR PMEM
+    @always(clk.posedge)
+    def avr_pmem():
+        if avr_pmem_ce:
+            addr = int(avr_pmem_a)
+            data = None
+            if addr < len(avrcode) / 2:
+                data = ord(avrcode[addr * 2]) | (ord(avrcode[addr * 2 + 1]) << 8)
+            if data is None:
+                print "ERROR AVR READ INVALID {:03X}".format(addr)
+                data = 0
+            else:
+                print "AVR PMEM {:03X} => {:04X}".format(addr, data)
+
+            avr_pmem_d.next = data
+
+    # AVR I/O
+    @always(clk.posedge)
+    def avr_io_w():
+        if avr_io_we:
+            addr = int(avr_io_a)
+            data = int(avr_io_do)
+
+            if addr == 0x00:
+                # Debug port
+                sys.stdout.write("\x1b[31m{:c}\x1b[39m".format(data))
+            else:
+                print "ERROR AVR IO W {:02X} => {:02X}".format(data, addr)
 
     # Reset generator (temp)
     @instance
@@ -45,7 +75,7 @@ def Toplevel(clk,
         yield delay(11)
         avr_rst.next = 0;
 
-    return (clk_gen, rst_tmp)
+    return (clk_gen, rst_tmp, avr_pmem, avr_io_w)
 
 # Navre AVR cosimulation
 def navre(clk,
