@@ -4,4 +4,8 @@
 *.elf
 *.bin
 
+datapath.vhd
+decode_core.vhd
+mult.vhd
+
 navre
