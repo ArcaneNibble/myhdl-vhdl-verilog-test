@@ -109,7 +109,24 @@ def Toplevel(clk,
         avr_rst.next = 0;
         j2_rst.next = 0;
 
-    return (clk_gen, rst_tmp, avr_pmem, avr_io_w)
+    # J2 IRAM
+    j2code = []
+    @always(j2_inst_en, j2_inst_a)
+    def j2_iram():
+        if j2_inst_en:
+            addr = int(j2_inst_a)
+            data = None
+            if addr < len(j2code) / 2:
+                data = ord(j2code[addr * 2]) | (ord(j2code[addr * 2 + 1]) << 8)
+            if data is None:
+                print "ERROR J2 READ INVALID {:08X}".format(addr)
+                data = 0
+            else:
+                print "J2 IRAM {:08X} => {:04X}".format(addr, data)
+
+            avr_pmem_d.next = data
+
+    return (clk_gen, rst_tmp, avr_pmem, avr_io_w, j2_iram)
 
 # Navre AVR cosimulation
 def navre(clk,
@@ -188,7 +205,7 @@ def jcore(clk,
     os.system("ghdl -a cpu2j0_pkg.vhd components_pkg.vhd mult_pkg.vhd decode_pkg.vhd datapath_pkg.vhd cpu.vhd mult.vhd datapath.vhd register_file.vhd decode.vhd decode_body.vhd decode_table.vhd decode_core.vhd decode_table_simple.vhd decode_table_simple_config.vhd decode_table_reverse.vhd decode_table_reverse_config.vhd decode_table_rom.vhd decode_table_rom_config.vhd cpu_config.vhd jcore_unrecord_wrap.vhd dut_jcore_cpu.vhd")
     os.system("ghdl -e dut_jcore_cpu")
 
-    return Cosimulation("./dut_jcore_cpu --vpi=./myhdl-ghdl.vpi",
+    return Cosimulation("./dut_jcore_cpu --vcd=j2.vcd --vpi=./myhdl-ghdl.vpi",
         from_myhdl_clk=clk,
         from_myhdl_rst=rst,
         to_myhdl_db_en=db_en,
@@ -258,7 +275,8 @@ j2_inst_en = Signal(False)
 j2_inst_a = Signal(intbv(0)[32:1])
 j2_inst_jp = Signal(False)
 j2_inst_d = Signal(intbv(0)[16:])
-j2_inst_ack = Signal(False)
+# IMEM always ready
+j2_inst_ack = Signal(True)
 j2_debug_ack = Signal(False)
 j2_debug_do = Signal(intbv(0)[32:])
 j2_debug_rdy = Signal(False)
