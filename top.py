@@ -130,7 +130,7 @@ def Toplevel(clk,
             if addr < len(j2code) / 2:
                 data = ord(j2code[addr * 2 + 1]) | (ord(j2code[addr * 2]) << 8)
             if data is None:
-                print "ERROR J2 READ INVALID {:08X}".format(addr)
+                print "ERROR J2 IREAD INVALID {:08X}".format(addr)
                 data = 0
             else:
                 print "J2 IRAM {:08X} => {:04X}".format(addr, data)
@@ -140,7 +140,39 @@ def Toplevel(clk,
         else:
             j2_inst_ack.next = False
 
-    return (clk_gen, rst_tmp, avr_pmem, avr_io_w, j2_iram)
+    # J2 DRAM
+    @always(j2_db_en, j2_db_a, j2_db_rd, j2_db_wr, j2_db_we, j2_db_do)
+    def j2_dram():
+        if j2_db_en:
+            addr = int(j2_db_a) & ~3
+            datain = int(j2_db_do)
+            if j2_db_rd:
+                data = None
+                if (addr + 3) < len(j2code):
+                    data = (ord(j2code[addr + 3]) |
+                            (ord(j2code[addr + 2]) << 8) |
+                            (ord(j2code[addr + 1]) << 16) |
+                            (ord(j2code[addr]) << 24))
+                if data is None:
+                    print "ERROR J2 DREAD INVALID {:08X}".format(addr)
+                    data = 0
+                else:
+                    print "J2 DRAM {:08X} => {:08X}".format(addr, data)
+
+                j2_db_di.next = data
+            if j2_db_wr:
+                if addr == 0xaaaa0000:
+                    # Debug port
+                    sys.stdout.write("\x1b[32m{:c}\x1b[39m".format(
+                        datain & 0xFF))
+                else:
+                    print "ERROR J2 DWRITE INVALID {:08X} => {:08X}".format(
+                        datain, addr)
+            j2_db_ack.next = True
+        else:
+            j2_db_ack.next = False
+
+    return (clk_gen, rst_tmp, avr_pmem, avr_io_w, j2_iram, j2_dram)
 
 # Navre AVR cosimulation
 def navre(clk,
