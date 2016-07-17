@@ -113,6 +113,18 @@ def navre(clk,
         irq=avr_irq,
         irq_ack=avr_irq_ack)
 
+# J-core cosimulation
+def jcore():
+    os.system("perl v2p <datapath.vhm >datapath.vhd")
+    os.system("perl v2p <decode_core.vhm >decode_core.vhd")
+    os.system("perl v2p <mult.vhm >mult.vhd")
+
+    os.system("ghdl -a cpu2j0_pkg.vhd components_pkg.vhd mult_pkg.vhd decode_pkg.vhd datapath_pkg.vhd cpu.vhd mult.vhd datapath.vhd register_file.vhd decode.vhd decode_body.vhd decode_table.vhd decode_core.vhd decode_table_simple.vhd decode_table_simple_config.vhd decode_table_reverse.vhd decode_table_reverse_config.vhd decode_table_rom.vhd decode_table_rom_config.vhd cpu_config.vhd jcore_unrecord_wrap.vhd dut_jcore_cpu.vhd")
+    os.system("ghdl -e dut_jcore_cpu")
+
+jcore()
+sys.exit(1)
+
 # FIXME move this?
 clk = Signal(False)
 

@@ -8,4 +8,7 @@ datapath.vhd
 decode_core.vhd
 mult.vhd
 
+work-obj93.cf
+
 navre
+dut_jcore_cpu
