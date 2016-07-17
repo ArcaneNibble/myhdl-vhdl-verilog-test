@@ -1,4 +1,5 @@
 *.vcd*
+*.ghw
 
 *.o
 *.elf

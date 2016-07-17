@@ -125,6 +125,9 @@ def Toplevel(clk,
                 print "J2 IRAM {:08X} => {:04X}".format(addr, data)
 
             avr_pmem_d.next = data
+            j2_inst_ack.next = True
+        else:
+            j2_inst_ack.next = False
 
     return (clk_gen, rst_tmp, avr_pmem, avr_io_w, j2_iram)
 
@@ -205,7 +208,7 @@ def jcore(clk,
     os.system("ghdl -a cpu2j0_pkg.vhd components_pkg.vhd mult_pkg.vhd decode_pkg.vhd datapath_pkg.vhd cpu.vhd mult.vhd datapath.vhd register_file.vhd decode.vhd decode_body.vhd decode_table.vhd decode_core.vhd decode_table_simple.vhd decode_table_simple_config.vhd decode_table_reverse.vhd decode_table_reverse_config.vhd decode_table_rom.vhd decode_table_rom_config.vhd cpu_config.vhd jcore_unrecord_wrap.vhd dut_jcore_cpu.vhd")
     os.system("ghdl -e dut_jcore_cpu")
 
-    return Cosimulation("./dut_jcore_cpu --vcd=j2.vcd --vpi=./myhdl-ghdl.vpi",
+    return Cosimulation("./dut_jcore_cpu --wave=j2.ghw --vpi=./myhdl-ghdl.vpi",
         from_myhdl_clk=clk,
         from_myhdl_rst=rst,
         to_myhdl_db_en=db_en,
@@ -275,8 +278,7 @@ j2_inst_en = Signal(False)
 j2_inst_a = Signal(intbv(0)[32:1])
 j2_inst_jp = Signal(False)
 j2_inst_d = Signal(intbv(0)[16:])
-# IMEM always ready
-j2_inst_ack = Signal(True)
+j2_inst_ack = Signal(False)
 j2_debug_ack = Signal(False)
 j2_debug_do = Signal(intbv(0)[32:])
 j2_debug_rdy = Signal(False)
