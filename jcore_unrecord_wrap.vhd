@@ -61,6 +61,12 @@ architecture arch of jcore_cpu is
 
     signal debug_cmd_typed : cpu_debug_cmd_t;
     signal event_cmd_typed : cpu_event_cmd_t;
+
+    --- XXX WHY ARE THESE NEEDED??
+    signal db_i_xxx : cpu_data_i_t;
+    signal inst_i_xxx : cpu_instruction_i_t;
+    signal debug_i_xxx : cpu_debug_i_t := CPU_DEBUG_NOP;
+    signal event_i_xxx : cpu_event_i_t := NULL_CPU_EVENT_I;
 begin
     process(debug_cmd)
     begin
@@ -92,6 +98,37 @@ begin
         end case;
     end process;
 
+    --- XXX WHY ARE THESE NEEDED??
+    process(db_di, db_ack)
+    begin
+        db_i_xxx.d <= db_di;
+        db_i_xxx.ack <= db_ack;
+    end process;
+
+    process(inst_d, inst_ack)
+    begin
+        inst_i_xxx.d <= inst_d;
+        inst_i_xxx.ack <= inst_ack;
+    end process;
+
+    process(debug_en, debug_cmd_typed, debug_ir, debug_di, debug_d_en)
+    begin
+        debug_i_xxx.en <= debug_en;
+        debug_i_xxx.cmd <= debug_cmd_typed; -- special!
+        debug_i_xxx.ir <= debug_ir;
+        debug_i_xxx.d <= debug_di;
+        debug_i_xxx.d_en <= debug_d_en;
+    end process;
+
+    process()
+    begin
+        event_i_xxx.en <= event_en;
+        event_i_xxx.cmd <= event_cmd_typed; -- special!
+        event_i_xxx.vec <= event_vec;
+        event_i_xxx.msk <= event_msk;
+        event_i_xxx.lvl <= event_lvl_;
+    end process;
+
     jcore: cpu port map (
         clk => clk,
         rst => rst,
@@ -102,29 +139,19 @@ begin
         db_o.we => db_we,
         db_o.d => db_do,
         db_lock => db_lock,
-        db_i.d => db_di,
-        db_i.ack => db_ack,
+        db_i => db_i_xxx,
         inst_o.en => inst_en,
         inst_o.a => inst_a,
         inst_o.jp => inst_jp,
-        inst_i.d => inst_d,
-        inst_i.ack => inst_ack,
+        inst_i => inst_i_xxx,
         debug_o.ack => debug_ack,
         debug_o.d => debug_do,
         debug_o.rdy => debug_rdy,
-        debug_i.en => debug_en,
-        debug_i.cmd => debug_cmd_typed, -- special!
-        debug_i.ir => debug_ir,
-        debug_i.d => debug_di,
-        debug_i.d_en => debug_d_en,
+        debug_i => debug_i_xxx,
         event_o.ack => event_ack,
         event_o.lvl => event_lvl_o,
         event_o.slp => event_slp,
         event_o.dbg => event_dbg,
-        event_i.en => event_en,
-        event_i.cmd => event_cmd_typed, -- special!
-        event_i.vec => event_vec,
-        event_i.msk => event_msk,
-        event_i.lvl => event_lvl_i
+        event_i => event_i_xxx
     );
 end architecture;
