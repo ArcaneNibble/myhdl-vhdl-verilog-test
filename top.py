@@ -109,22 +109,33 @@ def Toplevel(clk,
         avr_rst.next = 0;
         j2_rst.next = 0;
 
+    # Assembling the SH2 assembly code
+    def assemble_sh2(fn):
+        os.system("sh2elf-as -o {0}.o {0}.s".format(fn))
+        os.system("sh2elf-gcc -o {0}.elf -Wl,--section-start=.text=0 -nostartfiles -nostdlib {0}.o".format(fn))
+        os.system("sh2elf-objcopy -O binary --only-section=.text {0}.elf {0}.bin".format(fn))
+
+        f = open("{0}.bin".format(fn), 'rb')
+        data = f.read()
+        f.close()
+        return data
+    j2code = assemble_sh2("sh2code")
+
     # J2 IRAM
-    j2code = []
     @always(j2_inst_en, j2_inst_a)
     def j2_iram():
         if j2_inst_en:
             addr = int(j2_inst_a)
             data = None
             if addr < len(j2code) / 2:
-                data = ord(j2code[addr * 2]) | (ord(j2code[addr * 2 + 1]) << 8)
+                data = ord(j2code[addr * 2 + 1]) | (ord(j2code[addr * 2]) << 8)
             if data is None:
                 print "ERROR J2 READ INVALID {:08X}".format(addr)
                 data = 0
             else:
                 print "J2 IRAM {:08X} => {:04X}".format(addr, data)
 
-            avr_pmem_d.next = data
+            j2_inst_d.next = data
             j2_inst_ack.next = True
         else:
             j2_inst_ack.next = False

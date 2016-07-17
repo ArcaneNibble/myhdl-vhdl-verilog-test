@@ -120,13 +120,13 @@ begin
         debug_i_xxx.d_en <= debug_d_en;
     end process;
 
-    process()
+    process(event_en, event_cmd_typed, event_vec, event_msk, event_lvl_i)
     begin
         event_i_xxx.en <= event_en;
         event_i_xxx.cmd <= event_cmd_typed; -- special!
         event_i_xxx.vec <= event_vec;
         event_i_xxx.msk <= event_msk;
-        event_i_xxx.lvl <= event_lvl_;
+        event_i_xxx.lvl <= event_lvl_i;
     end process;
 
     jcore: cpu port map (
