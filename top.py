@@ -82,7 +82,7 @@ def Toplevel(clk,
             if addr < len(avrcode) / 2:
                 data = ord(avrcode[addr * 2]) | (ord(avrcode[addr * 2 + 1]) << 8)
             if data is None:
-                print "ERROR AVR READ INVALID {:03X}".format(addr)
+                print "ERROR AVR PREAD INVALID {:03X}".format(addr)
                 data = 0
             else:
                 if DEBUGPRINT:
@@ -100,6 +100,11 @@ def Toplevel(clk,
             if addr == 0x00:
                 # Debug port
                 sys.stdout.write("\x1b[31m{:c}\x1b[39m".format(data))
+                sys.stdout.flush()
+            elif addr == 0x3D:
+                print "AVR has set SPL to {:02X}".format(data)
+            elif addr == 0x3E:
+                print "AVR has set SPL to {:02X}".format(data)
             else:
                 print "ERROR AVR IO W {:02X} => {:02X}".format(data, addr)
 
@@ -170,6 +175,7 @@ def Toplevel(clk,
                     # Debug port
                     sys.stdout.write("\x1b[32m{:c}\x1b[39m".format(
                         datain & 0xFF))
+                    sys.stdout.flush()
                 else:
                     if DEBUGPRINT:
                         print ("ERROR J2 DWRITE INVALID {:08X} => {:08X}"
@@ -178,7 +184,35 @@ def Toplevel(clk,
         else:
             j2_db_ack.next = False
 
-    return (clk_gen, rst_tmp, avr_pmem, avr_io_w, j2_iram, j2_dram)
+    # Shared RAM (including AVR stack)
+    shared_ram = [0] * 256
+    @always(clk.posedge)
+    def avr_dmem():
+        addr = int(avr_dmem_a)
+        if avr_dmem_we:
+            datain = int(avr_dmem_do)
+            if addr < len(shared_ram):
+                shared_ram[addr] = datain
+                if DEBUGPRINT:
+                    print "AVR DMEM WRITE {:02X} => {:04X}".format(
+                            datain, addr)
+            else:
+                print "ERROR AVR DMEM WRITE INVALID {:02X} => {:04X}".format(
+                    datain, addr)
+        else:
+            data = None
+            if addr < len(shared_ram):
+                data = shared_ram[addr]
+            if data is None:
+                print "ERROR AVR DREAD INVALID {:03X}".format(addr)
+                data = 0
+            else:
+                if DEBUGPRINT:
+                    print "AVR DMEM {:03X} => {:04X}".format(addr, data)
+
+            avr_dmem_di.next = data
+
+    return (clk_gen, rst_tmp, avr_pmem, avr_io_w, j2_iram, j2_dram, avr_dmem)
 
 # Navre AVR cosimulation
 def navre(clk,
@@ -446,4 +480,4 @@ j2_inst = jcore(
     j2_event_lvl_i)
 toplevel_inst.config_sim(trace=True)
 sim = Simulation(toplevel_inst, navre_inst, j2_inst)
-sim.run(1000)
+sim.run(10000)
