@@ -1,6 +1,10 @@
 .section .text
 .global start
 
+vectors:
+    .long start
+    .long 0
+
 start:
     /* Print first hello */
     mova sh2_boot_msg, r0
