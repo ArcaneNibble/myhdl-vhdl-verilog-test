@@ -102,9 +102,11 @@ def Toplevel(clk,
                 sys.stdout.write("\x1b[31m{:c}\x1b[39m".format(data))
                 sys.stdout.flush()
             elif addr == 0x3D:
-                print "AVR has set SPL to {:02X}".format(data)
+                if DEBUGPRINT:
+                    print "AVR has set SPL to {:02X}".format(data)
             elif addr == 0x3E:
-                print "AVR has set SPL to {:02X}".format(data)
+                if DEBUGPRINT:
+                    print "AVR has set SPL to {:02X}".format(data)
             else:
                 print "ERROR AVR IO W {:02X} => {:02X}".format(data, addr)
 
@@ -147,6 +149,9 @@ def Toplevel(clk,
         else:
             j2_inst_ack.next = False
 
+    # Shared RAM (including AVR stack)
+    shared_ram = [0] * 256
+
     # J2 DRAM
     @always(j2_db_en, j2_db_a, j2_db_rd, j2_db_wr, j2_db_we, j2_db_do)
     def j2_dram():
@@ -160,6 +165,15 @@ def Toplevel(clk,
                             (ord(j2code[addr + 2]) << 8) |
                             (ord(j2code[addr + 1]) << 16) |
                             (ord(j2code[addr]) << 24))
+                elif (addr >= 0xbbbb0000 and
+                    addr < (0xbbbb0000 + len(shared_ram))):
+                    # Shared RAM
+                    addr -= 0xbbbb0000
+                    data = (shared_ram[addr + 3] |
+                            (shared_ram[addr + 2] << 8) |
+                            (shared_ram[addr + 1] << 16) |
+                            (shared_ram[addr] << 24))
+
                 if data is None:
                     print "ERROR J2 DREAD INVALID {:08X}".format(addr)
                     data = 0
@@ -170,14 +184,29 @@ def Toplevel(clk,
                 j2_db_di.next = data
             if j2_db_wr:
                 if addr == 0xaaaa0000:
-                    # Debug port
-                    sys.stdout.write("\x1b[32m{:c}\x1b[39m".format(
-                        datain & 0xFF))
-                    sys.stdout.flush()
+                    if j2_db_we[3]:
+                        # Debug port
+                        sys.stdout.write("\x1b[32m{:c}\x1b[39m".format(
+                            datain & 0xFF))
+                        sys.stdout.flush()
                 elif addr == 0xaaaa0004:
-                    # AVR reset
-                    print "POKED AVR RESET: {:08X}".format(datain)
-                    avr_rst.next = (datain != 0)
+                    if j2_db_we[3]:
+                        # AVR reset
+                        if DEBUGPRINT:
+                            print "POKED AVR RESET: {:08X}".format(datain)
+                        avr_rst.next = (datain != 0)
+                elif (addr >= 0xbbbb0000 and
+                    addr < (0xbbbb0000 + len(shared_ram))):
+                    # Shared RAM
+                    addr -= 0xbbbb0000
+                    if j2_db_we[0]:
+                        shared_ram[addr + 3] = (datain >>  0) & 0xFF
+                    if j2_db_we[1]:
+                        shared_ram[addr + 2] = (datain >>  8) & 0xFF
+                    if j2_db_we[2]:
+                        shared_ram[addr + 1] = (datain >> 16) & 0xFF
+                    if j2_db_we[3]:
+                        shared_ram[addr + 0] = (datain >> 24) & 0xFF
                 else:
                     if DEBUGPRINT:
                         print ("ERROR J2 DWRITE INVALID {:08X} => {:08X}"
@@ -186,8 +215,7 @@ def Toplevel(clk,
         else:
             j2_db_ack.next = False
 
-    # Shared RAM (including AVR stack)
-    shared_ram = [0] * 256
+    # AVR DMEM
     @always(clk.posedge)
     def avr_dmem():
         addr = int(avr_dmem_a)
@@ -482,4 +510,4 @@ j2_inst = jcore(
     j2_event_lvl_i)
 toplevel_inst.config_sim(trace=True)
 sim = Simulation(toplevel_inst, navre_inst, j2_inst)
-sim.run(10000)
+sim.run(100000)

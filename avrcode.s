@@ -34,14 +34,14 @@ _start:
     st x+, r2
     st x+, r3
 
-    /* Store a done flag at address 5 */
-    ldi r16, 1
-    st x+, r16
-
     /* Print last hello */
     ldi zl, lo8(avr_done_msg)
     ldi zh, hi8(avr_done_msg)
     rcall print
+
+    /* Store a done flag at address 8 */
+    ldi r16, 1
+    st x+, r16
 loop:
     rjmp loop
 
