@@ -3,12 +3,13 @@
 
 start:
     /* Print first hello */
-    mov.l sh2_boot_msg_addr, r1
+    mova sh2_boot_msg, r0
     bsr print
-     nop
+     mov r0, r1
 
     /* Test AVR */
-    mov.l testvalues_addr, r12
+    mova testvalues, r0
+    mov r0, r12
     bsr test_avr
      mov.l @(0, r12), r0
     bsr test_avr
@@ -21,9 +22,9 @@ start:
      mov.l @(16, r12), r0
 
     /* Print last hello */
-    mov.l sh2_done_msg_addr, r1
+    mova sh2_done_msg, r0
     bsr print
-     nop
+     mov r0, r1
 loop:
     bra loop
      nop
@@ -37,16 +38,16 @@ test_avr:
     mov.l avr_rst_addr, r11
 
     /* Print before */
-    mov.l sh2_input_msg_addr, r1
+    mova sh2_input_msg, r0
     bsr print
-     nop
+     mov r0, r1
 
     bsr print_word
      mov r9, r1
 
-    mov.l newline_addr, r1
+    mova newline, r0
     bsr print
-     nop
+     mov r0, r1
 
     /* Write shared word (flip endian) */
     swap.b r9, r9
@@ -78,16 +79,16 @@ waitavr:
     mov.l r0, @r11
 
     /* Print after */
-    mov.l sh2_output_msg_addr, r1
+    mova sh2_output_msg, r0
     bsr print
-     nop
+     mov r0, r1
 
     bsr print_word
      mov r9, r1
 
-    mov.l newline_addr, r1
+    mova newline, r0
     bsr print
-     nop
+     mov r0, r1
 
     lds r8, pr
     rts
@@ -108,7 +109,8 @@ print_exit:
 
 /* r1 = val */
 print_word:
-    mov.l hexlut_addr, r2
+    mova hexlut, r0
+    mov r0, r2
     mov.l debug_addr, r3
 
     swap.w r1, r0
@@ -171,8 +173,6 @@ sharedmem_addr:
     .long 0xbbbb0000
 
 .align 4
-testvalues_addr:
-    .long testvalues
 testvalues:
     .long 123
     .long 456
@@ -181,37 +181,25 @@ testvalues:
     .long 0xDEADBEEF
 
 .align 4
-hexlut_addr:
-    .long hexlut
 hexlut:
     .ascii "0123456789ABCDEF"
 
 .align 4
-sh2_boot_msg_addr:
-    .long sh2_boot_msg
 sh2_boot_msg:
     .asciz "SH2 is booting!\n"
 
 .align 4
-sh2_done_msg_addr:
-    .long sh2_done_msg
 sh2_done_msg:
     .asciz "SH2 is done!\n"
 
 .align 4
-sh2_input_msg_addr:
-    .long sh2_input_msg
 sh2_input_msg:
     .asciz "TO AVR: "
 
 .align 4
-sh2_output_msg_addr:
-    .long sh2_output_msg
 sh2_output_msg:
     .asciz "FROM AVR: "
 
 .align 4
-newline_addr:
-    .long newline
 newline:
     .asciz "\n"
