@@ -7,9 +7,8 @@ vectors:
 
 start:
     /* Print first hello */
-    mova sh2_boot_msg, r0
     bsr print
-     mov r0, r1
+     mova sh2_boot_msg, r0
 
     /* Test AVR */
     mova testvalues, r0
@@ -26,9 +25,8 @@ start:
      mov.l @(16, r12), r0
 
     /* Print last hello */
-    mova sh2_done_msg, r0
     bsr print
-     mov r0, r1
+     mova sh2_done_msg, r0
 loop:
     bra loop
      nop
@@ -42,16 +40,14 @@ test_avr:
     mov.l avr_rst_addr, r11
 
     /* Print before */
-    mova sh2_input_msg, r0
     bsr print
-     mov r0, r1
+     mova sh2_input_msg, r0
 
     bsr print_word
      mov r9, r1
 
-    mova newline, r0
     bsr print
-     mov r0, r1
+     mova newline, r0
 
     /* Write shared word (flip endian) */
     swap.b r9, r9
@@ -83,23 +79,22 @@ waitavr:
     mov.l r0, @r11
 
     /* Print after */
-    mova sh2_output_msg, r0
     bsr print
-     mov r0, r1
+     mova sh2_output_msg, r0
 
     bsr print_word
      mov r9, r1
 
-    mova newline, r0
     bsr print
-     mov r0, r1
+     mova newline, r0
 
     lds r8, pr
     rts
      nop
 
-/* r1 = str */
+/* r0 = str */
 print:
+    mov r0, r1
     mov.l debug_addr, r2
     mov.b @r1, r0
     cmp/eq #0, r0
