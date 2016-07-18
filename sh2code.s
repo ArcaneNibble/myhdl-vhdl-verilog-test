@@ -3,14 +3,19 @@
 
 start:
     /* Print first hello */
+    mov.l sh2_boot_msg_addr, r1
     bsr print
-     /* BUG?! */
-     mov.l sh2_boot_msg_addr-8, r1
+     nop
+
+    /* Turn AVR on */
+    mov.l avr_rst_addr, r1
+    mov #0, r0
+    mov.l r0, @r1
 
     /* Print first hello */
+    mov.l sh2_done_msg_addr, r1
     bsr print
-     /* BUG?! */
-     mov.l sh2_done_msg_addr-4, r1
+     nop
 loop:
     bra loop
      nop
@@ -32,6 +37,8 @@ print_exit:
 .align 4
 debug_addr:
     .long 0xaaaa0000
+avr_rst_addr:
+    .long 0xaaaa0004
 
 
 .align 4

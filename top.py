@@ -108,13 +108,11 @@ def Toplevel(clk,
             else:
                 print "ERROR AVR IO W {:02X} => {:02X}".format(data, addr)
 
-    # Reset generator (temp)
+    # Reset generator (J2 only)
     @instance
-    def rst_tmp():
-        avr_rst.next = 1;
+    def j2_rst_gen():
         j2_rst.next = 1;
         yield delay(11)
-        avr_rst.next = 0;
         j2_rst.next = 0;
 
     # Assembling the SH2 assembly code
@@ -176,6 +174,10 @@ def Toplevel(clk,
                     sys.stdout.write("\x1b[32m{:c}\x1b[39m".format(
                         datain & 0xFF))
                     sys.stdout.flush()
+                elif addr == 0xaaaa0004:
+                    # AVR reset
+                    print "POKED AVR RESET: {:08X}".format(datain)
+                    avr_rst.next = (datain != 0)
                 else:
                     if DEBUGPRINT:
                         print ("ERROR J2 DWRITE INVALID {:08X} => {:08X}"
@@ -212,7 +214,7 @@ def Toplevel(clk,
 
             avr_dmem_di.next = data
 
-    return (clk_gen, rst_tmp, avr_pmem, avr_io_w, j2_iram, j2_dram, avr_dmem)
+    return (clk_gen, j2_rst_gen, avr_pmem, avr_io_w, j2_iram, j2_dram, avr_dmem)
 
 # Navre AVR cosimulation
 def navre(clk,
@@ -329,7 +331,7 @@ def jcore(clk,
 # FIXME move this?
 clk = Signal(False)
 
-avr_rst = Signal(False)
+avr_rst = Signal(True)
 avr_pmem_ce = Signal(False)
 avr_pmem_a = Signal(intbv(0)[11:])
 avr_pmem_d = Signal(intbv(0)[16:])
