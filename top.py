@@ -4,6 +4,8 @@ import sys
 
 from myhdl import *
 
+DEBUGPRINT = False
+
 @block
 def Toplevel(clk,
              avr_rst,
@@ -83,7 +85,8 @@ def Toplevel(clk,
                 print "ERROR AVR READ INVALID {:03X}".format(addr)
                 data = 0
             else:
-                print "AVR PMEM {:03X} => {:04X}".format(addr, data)
+                if DEBUGPRINT:
+                    print "AVR PMEM {:03X} => {:04X}".format(addr, data)
 
             avr_pmem_d.next = data
 
@@ -133,7 +136,8 @@ def Toplevel(clk,
                 print "ERROR J2 IREAD INVALID {:08X}".format(addr)
                 data = 0
             else:
-                print "J2 IRAM {:08X} => {:04X}".format(addr, data)
+                if DEBUGPRINT:
+                    print "J2 IRAM {:08X} => {:04X}".format(addr, data)
 
             j2_inst_d.next = data
             j2_inst_ack.next = True
@@ -157,7 +161,8 @@ def Toplevel(clk,
                     print "ERROR J2 DREAD INVALID {:08X}".format(addr)
                     data = 0
                 else:
-                    print "J2 DRAM {:08X} => {:08X}".format(addr, data)
+                    if DEBUGPRINT:
+                        print "J2 DRAM {:08X} => {:08X}".format(addr, data)
 
                 j2_db_di.next = data
             if j2_db_wr:
@@ -166,8 +171,9 @@ def Toplevel(clk,
                     sys.stdout.write("\x1b[32m{:c}\x1b[39m".format(
                         datain & 0xFF))
                 else:
-                    print "ERROR J2 DWRITE INVALID {:08X} => {:08X}".format(
-                        datain, addr)
+                    if DEBUGPRINT:
+                        print ("ERROR J2 DWRITE INVALID {:08X} => {:08X}"
+                            .format(datain, addr))
             j2_db_ack.next = True
         else:
             j2_db_ack.next = False
