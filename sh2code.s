@@ -19,8 +19,6 @@ start:
      mov.l @(12, r12), r0
     bsr test_avr
      mov.l @(16, r12), r0
-    bsr test_avr
-     mov.l @(20, r12), r0
 
     /* Print last hello */
     mov.l sh2_done_msg_addr, r1
