@@ -286,8 +286,6 @@ def jcore(clk,
         from_myhdl_event_msk=event_msk,
         from_myhdl_event_lvl_i=event_lvl_i)
 
-DO_J2_SIM = True
-
 # FIXME move this?
 clk = Signal(False)
 
@@ -389,62 +387,57 @@ toplevel_inst = Toplevel(
     j2_event_vec,
     j2_event_msk,
     j2_event_lvl_i)
-if not DO_J2_SIM:
-    navre_inst = navre(
-        clk,
-        avr_rst,
-        avr_pmem_ce,
-        avr_pmem_a,
-        avr_pmem_d,
-        avr_dmem_we,
-        avr_dmem_a,
-        avr_dmem_di,
-        avr_dmem_do,
-        avr_io_re,
-        avr_io_we,
-        avr_io_a,
-        avr_io_do,
-        avr_io_di,
-        avr_irq,
-        avr_irq_ack)
-else:
-    j2_inst = jcore(
-        clk,
-        j2_rst,
-        j2_db_en,
-        j2_db_a,
-        j2_db_rd,
-        j2_db_wr,
-        j2_db_we,
-        j2_db_do,
-        j2_db_lock,
-        j2_db_di,
-        j2_db_ack,
-        j2_inst_en,
-        j2_inst_a,
-        j2_inst_jp,
-        j2_inst_d,
-        j2_inst_ack,
-        j2_debug_ack,
-        j2_debug_do,
-        j2_debug_rdy,
-        j2_debug_en,
-        j2_debug_cmd,
-        j2_debug_ir,
-        j2_debug_di,
-        j2_debug_d_en,
-        j2_event_ack,
-        j2_event_lvl_o,
-        j2_event_slp,
-        j2_event_dbg,
-        j2_event_en,
-        j2_event_cmd,
-        j2_event_vec,
-        j2_event_msk,
-        j2_event_lvl_i)
+navre_inst = navre(
+    clk,
+    avr_rst,
+    avr_pmem_ce,
+    avr_pmem_a,
+    avr_pmem_d,
+    avr_dmem_we,
+    avr_dmem_a,
+    avr_dmem_di,
+    avr_dmem_do,
+    avr_io_re,
+    avr_io_we,
+    avr_io_a,
+    avr_io_do,
+    avr_io_di,
+    avr_irq,
+    avr_irq_ack)
+j2_inst = jcore(
+    clk,
+    j2_rst,
+    j2_db_en,
+    j2_db_a,
+    j2_db_rd,
+    j2_db_wr,
+    j2_db_we,
+    j2_db_do,
+    j2_db_lock,
+    j2_db_di,
+    j2_db_ack,
+    j2_inst_en,
+    j2_inst_a,
+    j2_inst_jp,
+    j2_inst_d,
+    j2_inst_ack,
+    j2_debug_ack,
+    j2_debug_do,
+    j2_debug_rdy,
+    j2_debug_en,
+    j2_debug_cmd,
+    j2_debug_ir,
+    j2_debug_di,
+    j2_debug_d_en,
+    j2_event_ack,
+    j2_event_lvl_o,
+    j2_event_slp,
+    j2_event_dbg,
+    j2_event_en,
+    j2_event_cmd,
+    j2_event_vec,
+    j2_event_msk,
+    j2_event_lvl_i)
 toplevel_inst.config_sim(trace=True)
-if not DO_J2_SIM:
-    sim = Simulation(toplevel_inst, navre_inst)
-else:
-    sim = Simulation(toplevel_inst, j2_inst)
+sim = Simulation(toplevel_inst, navre_inst, j2_inst)
 sim.run(1000)
