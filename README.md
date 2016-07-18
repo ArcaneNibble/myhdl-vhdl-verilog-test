@@ -13,6 +13,8 @@ This demonstration unfortunately requires a large number of dependencies to actu
 * You will need an x86_64 Linux machine to run the demonstration as-is. This is because of the binary .vpi files checked in to the repository. Alternatively, you can try to recompile these .vpi files (will require a native C compiler and possibly other stuff):
     * myhdl-icarus.vpi is compiled from the `cosimulation/icarus` directory that is part of MyHDL.
     * myhdl-ghdl.vpi is compiled from [this code I wrote](https://github.com/rqou/myhdl-ghdl-duct-tape). This code will eventually be submitted to MyHDL after it is cleaned up.
+* You will probably need a Linux machine even if it isn't x86_64. Windows and Mac were not tested.
+* Perl is required because of the `v2p` script that is part of J-core.
 
 If the simulation is running correctly, it should eventually print out
 ```
