@@ -6,30 +6,35 @@ vectors:
     .long 0
 
 start:
-    /* Print first hello */
-    bsr print
-     mova sh2_boot_msg, r0
+    bsr dummysub
+     mov.l testval1, r8
 
-    /* Test AVR */
-    mova testvalues, r0
-    mov r0, r12
-    bsr test_avr
-     mov.l @(0, r12), r0
-    bsr test_avr
-     mov.l @(4, r12), r0
-    bsr test_avr
-     mov.l @(8, r12), r0
-    bsr test_avr
-     mov.l @(12, r12), r0
-    bsr test_avr
-     mov.l @(16, r12), r0
+    bra jumphere
+     mov.l testval2, r9
 
-    /* Print last hello */
-    bsr print
-     mova sh2_done_msg, r0
+jumpback:
+    bsr print_word
+     mov r8, r1
+    bsr print_word
+     mov r9, r1
+
 loop:
     bra loop
      nop
+
+dummysub:
+    rts
+     nop
+
+jumphere:
+    bra jumpback
+     nop
+
+testval1:
+    .long 0xaabbccdd
+testval2:
+    .long 0xeeff9988
+
 
 /* r0 = input */
 test_avr:
