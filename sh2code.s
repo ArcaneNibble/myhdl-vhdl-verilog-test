@@ -114,11 +114,12 @@ waitavr:
 print:
     mov r0, r1
     mov.l debug_addr, r2
+print_loop:
     mov.b @r1, r0
     cmp/eq #0, r0
     bt print_exit
     mov.b r0, @r2
-    bra print
+    bra print_loop
      add #1, r1
 print_exit:
     rts
