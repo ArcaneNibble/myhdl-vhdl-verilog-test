@@ -6,6 +6,10 @@ vectors:
     .long 0
 
 start:
+    /* Print first hello */
+    bsr print
+     mova sh2_boot_msg, r0
+
     bsr dummysub
      mov.l testval1, r8
 
