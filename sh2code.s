@@ -9,10 +9,17 @@ start:
     bsr dummysub
      mov.l testval1, r8
 
-    bra jumphere
+    bra jumphere1
      mov.l testval2, r9
+jumpback1:
 
-jumpback:
+    bra jumphere2
+     mova testval1, r0
+jumpback2:
+
+
+    bsr print_word
+     mov r0, r1
     bsr print_word
      mov r8, r1
     bsr print_word
@@ -25,9 +32,11 @@ loop:
 dummysub:
     rts
      nop
-
-jumphere:
-    bra jumpback
+jumphere1:
+    bra jumpback1
+     nop
+jumphere2:
+    bra jumpback2
      nop
 
 testval1:
