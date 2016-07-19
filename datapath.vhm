@@ -167,7 +167,7 @@ begin
   begin
     if rising_edge(clk) then
       if delay_jump='1' then
-        pc_delay_save <= pc;
+        pc_delay_save <= std_logic_vector(unsigned(pc)+2);
       end if;
 
       delay_slot_delay <= delay_slot;
