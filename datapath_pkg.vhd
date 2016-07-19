@@ -50,6 +50,8 @@ package datapath_pack is
       if_stall    : out std_logic;
       mask_int    : out std_logic;
       illegal_delay_slot : out std_logic;
-      illegal_instr : out std_logic);
+      illegal_instr : out std_logic;
+      delay_jump : in std_logic;
+      delay_slot : in std_logic);
    end component datapath;
 end package;

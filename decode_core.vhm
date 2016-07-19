@@ -11,6 +11,7 @@ entity decode_core is
   port (
     clk : in std_logic;
     delay_jump : in std_logic;
+    delay_slot_out : out std_logic;
     dispatch : in std_logic;
     event_ack_0 : in std_logic;
     event_i : in cpu_event_i_t;
@@ -122,6 +123,8 @@ begin
       end if;
     end if;
   end process;
+
+  delay_slot_out <= delay_slot;
 
   maskint <= this'register.maskint;
   delay_slot <= this'register.delay_slot;

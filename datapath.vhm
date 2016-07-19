@@ -39,13 +39,15 @@ entity datapath is
 		     if_stall : out std_logic;
 		     mask_int : out std_logic;
 		     illegal_delay_slot : out std_logic;
-		     illegal_instr : out std_logic
+		     illegal_instr : out std_logic;
+         delay_jump : in std_logic;
+         delay_slot : in std_logic
 	     );
 end entity datapath;
 
 architecture stru of datapath is
 	subtype reg_t is std_logic_vector(31 downto 0);
-	signal gpf_zwd, pc, reg_x, reg_y, reg_0, xbus, ybus, ybus_temp, zbus, wbus : std_logic_vector(31 downto 0);
+	signal gpf_zwd, pc, pc_delay_save, pc_or_pc_saved, reg_x, reg_y, reg_0, xbus, ybus, ybus_temp, zbus, wbus : std_logic_vector(31 downto 0);
 	signal sr : sr_t;
 	signal sfto : std_logic;
 	-- alu ports
@@ -55,13 +57,14 @@ architecture stru of datapath is
 	signal ybus_override : bus_val_t;
 	signal slot_o : std_logic;
 
+  signal delay_slot_delay : std_logic;
+
         signal div1_arith_func : arith_func_t;
         signal arith_func : arith_func_t;
         signal arith_out : std_logic_vector(32 downto 0);
         signal logic_out : std_logic_vector(31 downto 0);
 
 	register variable this : datapath_reg_t reset := DATAPATH_RESET;
-
         -- The functions to_sr and to_slv convert between the sr record and its CPU register representation.
         function to_sr(a : std_logic_vector(31 downto 0)) return sr_t is
           variable r : sr_t;
@@ -153,8 +156,27 @@ architecture stru of datapath is
           return r;
         end align_read_data;
 begin
+
+  -- This logic here is used to fix PC-relative instructions in a branch
+  -- delay slot. When delay_jump is active is when pc contains the value
+  -- that should have been used before the branch is taken. The value
+  -- is then used one cycle after delay_slot for the instruction in the
+  -- delay slot.
+  -- XXX FIXME: Exactly which signals belong to which pipeline stage?
+  process(clk)
+  begin
+    if rising_edge(clk) then
+      if delay_jump='1' then
+        pc_delay_save <= pc;
+      end if;
+
+      delay_slot_delay <= delay_slot;
+    end if;
+  end process;
+  with delay_slot_delay select pc_or_pc_saved <= pc_delay_save when '1', pc when others;
+
 	-- Multiplexors for the internal buses
-	with buses.x_sel select xbus      <= reg_x when SEL_REG, pc when SEL_PC,                                                                 buses.imm_val when others;
+	with buses.x_sel select xbus      <= reg_x when SEL_REG, pc_or_pc_saved when SEL_PC,                                                                 buses.imm_val when others;
 	with buses.y_sel select ybus_temp <= reg_y when SEL_REG, pc when SEL_PC, mach when SEL_MACH, macl when SEL_MACL, to_slv(sr) when SEL_SR, buses.imm_val when others;
 	ybus <= ybus_override.d when ybus_override.en = '1' else ybus_temp;
 

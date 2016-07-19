@@ -201,7 +201,9 @@ package decode_pack is
             pc : out pc_ctrl_t;
             reg : out reg_ctrl_t;
             slp : out std_logic;
-            sr : out sr_ctrl_t
+            sr : out sr_ctrl_t;
+            delay_jump : out std_logic;
+            delay_slot : out std_logic
         );
     end component;
     component decode_core
@@ -209,6 +211,7 @@ package decode_pack is
             clk : in std_logic;
             debug : in std_logic;
             delay_jump : in std_logic;
+            delay_slot_out : out std_logic;
             dispatch : in std_logic;
             enter_debug : in std_logic;
             event_ack_0 : in std_logic;

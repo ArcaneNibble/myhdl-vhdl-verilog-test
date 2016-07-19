@@ -39,12 +39,14 @@ entity decode is
         pc : out pc_ctrl_t;
         reg : out reg_ctrl_t;
         slp : out std_logic;
-        sr : out sr_ctrl_t
+        sr : out sr_ctrl_t;
+        delay_jump : out std_logic;
+        delay_slot : out std_logic
     );
 end;
 architecture arch of decode is
     signal debug_o : std_logic;
-    signal delay_jump : std_logic;
+    signal delay_jump_int : std_logic;
     signal dispatch : std_logic;
     signal event_ack_0 : std_logic;
     signal ex : pipeline_ex_t;
@@ -72,7 +74,7 @@ begin
         port map (
             clk => clk,
             debug => debug_o,
-            delay_jump => delay_jump,
+            delay_jump => delay_jump_int,
             dispatch => dispatch,
             enter_debug => enter_debug,
             event_ack_0 => event_ack_0,
@@ -99,7 +101,8 @@ begin
             ilevel => sr.ilevel,
             incpc => pc.inc,
             next_id_stall => next_id_stall,
-            op => op
+            op => op,
+            delay_slot_out => delay_slot
         );
     table : decode_table
         port map (
@@ -108,7 +111,7 @@ begin
             op => op,
             t_bcc => t_bcc,
             debug => debug_o,
-            delay_jump => delay_jump,
+            delay_jump => delay_jump_int,
             dispatch => dispatch,
             event_ack_0 => event_ack_0,
             ex => ex,
@@ -181,6 +184,7 @@ begin
     reg.wr_z <= pipeline_r.ex1_stall.wrreg_z;
     buses.z_sel <= pipeline_r.ex1_stall.zbus_sel;
     reg.wr_w <= pipeline_r.wb3_stall.wrreg_w;
+    delay_jump <= delay_jump_int;
     -- assign combined outputs
     mac.com1 <= (pipeline_r.ex1_stall.mulcom1 or pipeline_r.wb3_stall.mulcom1);
     mac.wrmach <= (pipeline_r.ex1_stall.wrmach or pipeline_r.wb3_stall.wrmach);
