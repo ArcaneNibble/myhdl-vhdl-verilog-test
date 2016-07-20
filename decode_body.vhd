@@ -276,11 +276,56 @@ package body decode_pack is
     end;
     function check_illegal_instruction (code : std_logic_vector(15 downto 0)) return std_logic is
     begin
-        -- TODO: Improve detection of illegal instructions
-        if code(15 downto 8) = x"ff" then
-            return '1';
-        else
-            return '0';
-        end if;
+        case code(15 downto 12) is
+            when x"0" =>
+                if ((code(3 downto 0) = x"0") or (code(3 downto 0) = x"1") or
+                    ((code(3 downto 0) = x"2") and ((code(7 downto 4) /= x"0") and (code(7 downto 4) /= x"1") and (code(7 downto 4) /= x"2"))) or
+                    ((code(3 downto 0) = x"3") and ((code(7 downto 4) /= x"0") and (code(7 downto 4) /= x"2"))) or
+                    ((code(3 downto 0) = x"8") and ((code(11 downto 4) /= x"00") and (code(11 downto 4) /= x"01") and (code(11 downto 4) /= x"02"))) or
+                    ((code(3 downto 0) = x"9") and ((code(11 downto 4) /= x"00") and (code(11 downto 4) /= x"01") and (code(7 downto 4) /= x"2"))) or
+                    ((code(3 downto 0) = x"a") and ((code(7 downto 4) /= x"0") and (code(7 downto 4) /= x"1") and (code(7 downto 4) /= x"2"))) or
+                    ((code(3 downto 0) = x"b") and ((code(11 downto 4) /= x"00") and (code(11 downto 4) /= x"01") and (code(11 downto 4) /= x"02") and (code(11 downto 4) /= x"03")))) then
+                    return '1';
+                else
+                    return '0';
+                end if;
+
+            when x"3" =>
+                if ((code(3 downto 0) = x"1") or (code(3 downto 0) = x"9")) then
+                    return '1';
+                else
+                    return '0';
+                end if;
+
+            when x"4" =>
+                if ((code(7 downto 0) = x"14") or
+                    ((code(3 downto 0) /= x"c") and (code(3 downto 0) /= x"d" and (code(3 downto 0) /= x"f" and
+                        ((code(7 downto 4) /= x"0") and
+                        (code(7 downto 4) /= x"1") and
+                        (code(7 downto 4) /= x"2")))))) then
+                    return '1';
+                else
+                    return '0';
+                end if;
+
+            when x"8" =>
+                if ((code(11 downto 8) = x"2") or
+                    (code(11 downto 8) = x"3") or
+                    (code(11 downto 8) = x"6") or
+                    (code(11 downto 8) = x"7") or
+                    (code(11 downto 8) = x"a") or
+                    (code(11 downto 8) = x"c") or
+                    (code(11 downto 8) = x"e")) then
+                    return '1';
+                else
+                    return '0';
+                end if;
+
+            when x"f" =>
+                return '1';
+
+            when others =>
+                return '0';
+        end case;
     end;
 end;

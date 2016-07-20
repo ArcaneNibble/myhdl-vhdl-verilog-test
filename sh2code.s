@@ -7,13 +7,6 @@ vectors:
     .long except
 
 start:
-    mov #0, r0
-    ldc r0, vbr
-
-    bra jumphere
-     bra jumphere
-jumphere:
-
     /* Print first hello */
     bsr print
      mova sh2_boot_msg, r0
