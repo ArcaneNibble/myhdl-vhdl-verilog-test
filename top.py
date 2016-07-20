@@ -208,9 +208,8 @@ def Toplevel(clk,
                     if j2_db_we[3]:
                         shared_ram[addr + 0] = (datain >> 24) & 0xFF
                 else:
-                    if DEBUGPRINT:
-                        print ("ERROR J2 DWRITE INVALID {:08X} => {:08X}"
-                            .format(datain, addr))
+                    print ("ERROR J2 DWRITE INVALID {:08X} => {:08X}"
+                        .format(datain, addr))
             j2_db_ack.next = True
         else:
             j2_db_ack.next = False
