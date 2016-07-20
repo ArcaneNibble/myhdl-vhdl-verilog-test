@@ -4,8 +4,16 @@
 vectors:
     .long start
     .long 0
+    .long except
 
 start:
+    mov #0, r0
+    ldc r0, vbr
+
+    bra jumphere
+     bra jumphere
+jumphere:
+
     /* Print first hello */
     bsr print
      mova sh2_boot_msg, r0
@@ -29,6 +37,13 @@ start:
      mova sh2_done_msg, r0
 loop:
     bra loop
+     nop
+
+except:
+    bsr print
+     mova sh2_except_msg, r0
+loop2:
+    bra loop2
      nop
 
 /* r0 = input */
@@ -203,3 +218,7 @@ sh2_output_msg:
 .align 4
 newline:
     .asciz "\n"
+
+.align 4
+sh2_except_msg:
+    .asciz "SH2 EXCEPTION HAPPENED!"

@@ -75,7 +75,7 @@ architecture arch of decode_core is
   return operation_t is
     variable cd : std_logic_vector(15 downto 0);
   begin
-    cd := x"0" & system_instr_codes(instr) & x"00";
+    cd := x"0" & system_instr_codes(instr) & x"02";
     return system_op(cd, instr);
   end;
 
