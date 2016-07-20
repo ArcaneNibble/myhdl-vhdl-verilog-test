@@ -14,10 +14,12 @@ start:
     mov #0, r0
     ldc r0, vbr
 
-    /* .word 0 */
+    /*.word 0*/
+    nop
     bra jumphere
-     bra jumphere
-    /* fill */
+     ! bra jumphere
+     .word 0
+    .word 0xcccc
     .long 0xaaaaaaaa
     .long 0xbbbbbbbb
 jumphere:
