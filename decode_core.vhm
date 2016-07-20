@@ -75,7 +75,15 @@ architecture arch of decode_core is
   return operation_t is
     variable cd : std_logic_vector(15 downto 0);
   begin
-    cd := x"0" & system_instr_codes(instr) & x"02";
+    cd := x"0" & system_instr_codes(instr) & x"00";
+    return system_op(cd, instr);
+  end;
+
+  function system_op (instr : system_instr_t; imm : std_logic_vector(7 downto 0))
+  return operation_t is
+    variable cd : std_logic_vector(15 downto 0);
+  begin
+    cd := x"0" & system_instr_codes(instr) & imm;
     return system_op(cd, instr);
   end;
 
@@ -150,10 +158,10 @@ begin
            ( maskint = '0' and event_i.cmd = INTERRUPT and ( ibit < event_i.lvl or event_i.msk = '1' ) ) or
            ( event_i.cmd = ERROR or event_i.cmd = RESET_CPU or event_i.cmd = BREAK ) ) else
     -- Slot Illegal Instruction
-    system_op(SLOT_ILLEGAL)
+    system_op(SLOT_ILLEGAL, x"06")
       when delay_slot = '1' and (illegal_delay_slot or illegal_instr) = '1' else
     -- General Illegal Instruction
-    system_op(GENERAL_ILLEGAL)
+    system_op(GENERAL_ILLEGAL, x"04")
       when illegal_instr = '1' else
     -- Break Instruction
     system_op(BREAK)

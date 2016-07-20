@@ -4,12 +4,23 @@
 vectors:
     .long start
     .long 0
-    .long except
+    .long 0
+    .long 0
+    .long illegal_normal
+    .long 0
+    .long illegal_slot
 
 start:
     mov #0, r0
     ldc r0, vbr
-    .word 0
+
+    /* .word 0 */
+    bra jumphere
+     bra jumphere
+    /* fill */
+    .long 0xaaaaaaaa
+    .long 0xbbbbbbbb
+jumphere:
 
     /* Print first hello */
     bsr print
@@ -36,11 +47,18 @@ loop:
     bra loop
      nop
 
-except:
+illegal_normal:
     bsr print
-     mova sh2_except_msg, r0
+     mova sh2_illegal_normal_msg, r0
 loop2:
     bra loop2
+     nop
+
+illegal_slot:
+    bsr print
+     mova sh2_illegal_slot_msg, r0
+loop3:
+    bra loop3
      nop
 
 /* r0 = input */
@@ -217,5 +235,9 @@ newline:
     .asciz "\n"
 
 .align 4
-sh2_except_msg:
-    .asciz "SH2 EXCEPTION HAPPENED!"
+sh2_illegal_normal_msg:
+    .asciz "SH2 ILLEGAL INSTRUCTION HAPPENED!"
+
+.align 4
+sh2_illegal_slot_msg:
+    .asciz "SH2 ILLEGAL SLOT HAPPENED!"
