@@ -7,6 +7,10 @@ vectors:
     .long except
 
 start:
+    mov #0, r0
+    ldc r0, vbr
+    .word 0
+
     /* Print first hello */
     bsr print
      mova sh2_boot_msg, r0
