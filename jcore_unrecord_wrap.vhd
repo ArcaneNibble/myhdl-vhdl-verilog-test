@@ -56,7 +56,9 @@ architecture arch of jcore_cpu is
            debug_o      : out cpu_debug_o_t;
            debug_i      : in  cpu_debug_i_t;
            event_o      : out cpu_event_o_t;
-           event_i      : in  cpu_event_i_t);
+           event_i      : in  cpu_event_i_t;
+           general_illegal_vec : in std_logic_vector(7 downto 0);
+           slot_illegal_vec    : in std_logic_vector(7 downto 0));
     end component;
 
     signal debug_cmd_typed : cpu_debug_cmd_t;
@@ -152,6 +154,8 @@ begin
         event_o.lvl => event_lvl_o,
         event_o.slp => event_slp,
         event_o.dbg => event_dbg,
-        event_i => event_i_xxx
+        event_i => event_i_xxx,
+        general_illegal_vec => x"04",
+        slot_illegal_vec => x"06"
     );
 end architecture;

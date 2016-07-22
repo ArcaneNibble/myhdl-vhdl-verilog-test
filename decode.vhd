@@ -19,6 +19,7 @@ entity decode is
         clk : in std_logic;
         enter_debug : in std_logic;
         event_i : in cpu_event_i_t;
+        general_illegal_vec : in std_logic_vector(7 downto 0);
         ibit : in std_logic_vector(3 downto 0);
         if_dr : in std_logic_vector(15 downto 0);
         if_stall : in std_logic;
@@ -28,9 +29,12 @@ entity decode is
         mask_int : in std_logic;
         rst : in std_logic;
         slot : in std_logic;
+        slot_illegal_vec : in std_logic_vector(7 downto 0);
         t_bcc : in std_logic;
         buses : out buses_ctrl_t;
         debug : out std_logic;
+        delay_jump_out : out std_logic;
+        delay_slot_out : out std_logic;
         event_ack : out std_logic;
         func : out func_ctrl_t;
         instr : out instr_ctrl_t;
@@ -39,14 +43,12 @@ entity decode is
         pc : out pc_ctrl_t;
         reg : out reg_ctrl_t;
         slp : out std_logic;
-        sr : out sr_ctrl_t;
-        delay_jump : out std_logic;
-        delay_slot : out std_logic
+        sr : out sr_ctrl_t
     );
 end;
 architecture arch of decode is
     signal debug_o : std_logic;
-    signal delay_jump_int : std_logic;
+    signal delay_jump : std_logic;
     signal dispatch : std_logic;
     signal event_ack_0 : std_logic;
     signal ex : pipeline_ex_t;
@@ -69,18 +71,20 @@ architecture arch of decode is
     constant PIPELINE_RESET : pipeline_t := (ex1 => STAGE_EX_RESET, ex1_stall => STAGE_EX_STALL_RESET, wb1 => STAGE_WB_RESET, wb2 => STAGE_WB_RESET, wb3 => STAGE_WB_RESET, wb1_stall => STAGE_WB_STALL_RESET, wb2_stall => STAGE_WB_STALL_RESET, wb3_stall => STAGE_WB_STALL_RESET);
 begin
     maskint_o <= (mask_int or maskint_next);
+    delay_jump_out <= delay_jump;
     debug <= debug_o;
     core : decode_core
         port map (
             clk => clk,
             debug => debug_o,
-            delay_jump => delay_jump_int,
+            delay_jump => delay_jump,
             dispatch => dispatch,
             enter_debug => enter_debug,
             event_ack_0 => event_ack_0,
             event_i => event_i,
             ex => ex,
             ex_stall => ex_stall,
+            general_illegal_vec => general_illegal_vec,
             ibit => ibit,
             id => id,
             if_dr => if_dr,
@@ -94,15 +98,16 @@ begin
             p => pipeline_r,
             rst => rst,
             slot => slot,
+            slot_illegal_vec => slot_illegal_vec,
             t_bcc => t_bcc,
+            delay_slot_out => delay_slot_out,
             event_ack => event_ack,
             if_issue => instr.issue,
             ifadsel => instr.addr_sel,
             ilevel => sr.ilevel,
             incpc => pc.inc,
             next_id_stall => next_id_stall,
-            op => op,
-            delay_slot_out => delay_slot
+            op => op
         );
     table : decode_table
         port map (
@@ -111,7 +116,7 @@ begin
             op => op,
             t_bcc => t_bcc,
             debug => debug_o,
-            delay_jump => delay_jump_int,
+            delay_jump => delay_jump,
             dispatch => dispatch,
             event_ack_0 => event_ack_0,
             ex => ex,
@@ -184,7 +189,6 @@ begin
     reg.wr_z <= pipeline_r.ex1_stall.wrreg_z;
     buses.z_sel <= pipeline_r.ex1_stall.zbus_sel;
     reg.wr_w <= pipeline_r.wb3_stall.wrreg_w;
-    delay_jump <= delay_jump_int;
     -- assign combined outputs
     mac.com1 <= (pipeline_r.ex1_stall.mulcom1 or pipeline_r.wb3_stall.mulcom1);
     mac.wrmach <= (pipeline_r.ex1_stall.wrmach or pipeline_r.wb3_stall.wrmach);

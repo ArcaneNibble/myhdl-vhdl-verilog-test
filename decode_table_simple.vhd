@@ -4399,12 +4399,12 @@ begin
                     ex_stall.wrpc_z <= '1';
 
                 when x"5" =>
-                    -- X = TEMP1
+                    -- X = TEMP0
                     ex.xbus_sel <= SEL_REG;
-                    ex.regnum_x <= "10100";
-                    -- Y = TEMP1
+                    ex.regnum_x <= "10011";
+                    -- Y = TEMP0
                     ex.ybus_sel <= SEL_REG;
-                    ex.regnum_y <= "10100";
+                    ex.regnum_y <= "10011";
                     -- Z = X xor Y
                     ex_stall.zbus_sel <= SEL_LOGIC;
                     ex.logic_func <= LOGIC_XOR;

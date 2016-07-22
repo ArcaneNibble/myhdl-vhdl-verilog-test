@@ -17,7 +17,9 @@ entity cpu is port (
    debug_o      : out cpu_debug_o_t;
    debug_i      : in  cpu_debug_i_t;
    event_o      : out cpu_event_o_t;
-   event_i      : in  cpu_event_i_t);
+   event_i      : in  cpu_event_i_t;
+   general_illegal_vec : in std_logic_vector(7 downto 0);
+   slot_illegal_vec    : in std_logic_vector(7 downto 0));
 end entity cpu;
 
 architecture stru of cpu is 
@@ -63,8 +65,10 @@ begin
       ibit => ibit,
       slp => slp_o,
       mask_int => mask_int,
-      delay_jump => delay_jump,
-      delay_slot => delay_slot);
+      general_illegal_vec => general_illegal_vec,
+      slot_illegal_vec => slot_illegal_vec,
+      delay_jump_out => delay_jump,
+      delay_slot_out => delay_slot);
    u_mult : mult port map (clk => clk, rst => rst, slot => slot, a => mac_i, y => mac_o);
       mac_i.wr_m1 <= mac.com1; mac_i.command <= mac.com2;
       mac_i.wr_mach <= mac.wrmach; mac_i.wr_macl <= mac.wrmacl;

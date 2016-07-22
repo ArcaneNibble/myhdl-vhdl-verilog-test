@@ -11,12 +11,9 @@ vectors:
     .long illegal_slot
 
 start:
-    mov #0, r0
-    ldc r0, vbr
-
     /*.word 0*/
-    nop
-    bra jumphere
+    sett
+    bt/s jumphere
      ! bra jumphere
      .word 0
     .word 0xcccc
