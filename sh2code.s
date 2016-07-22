@@ -11,17 +11,6 @@ vectors:
     .long illegal_slot
 
 start:
-    .word 0
-    nop
-    clrt
-    bt/s jumphere
-     bra hexlut ! bullshit address for testing
-     ! .word 0
-     .word 0xcccc
-    .long 0xaaaaaaaa
-    .long 0xbbbbbbbb
-jumphere:
-
     /* Print first hello */
     bsr print
      mova sh2_boot_msg, r0
@@ -79,10 +68,7 @@ test_avr:
     bsr print
      mova newline, r0
 
-    /* Write shared word (flip endian) */
-    swap.b r9, r9
-    swap.w r9, r9
-    swap.b r9, r9
+    /* Write shared word */
     mov.l r9, @r10
 
     /* Turn AVR on */
@@ -98,11 +84,8 @@ waitavr:
     mov #0, r0
     mov.b r0, @(8, r10)
 
-    /* Read shared word (flip endian) */
+    /* Read shared word */
     mov.l @(4, r10), r9
-    swap.b r9, r9
-    swap.w r9, r9
-    swap.b r9, r9
 
     /* Turn AVR off */
     mov #1, r0

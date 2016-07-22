@@ -119,8 +119,8 @@ def Toplevel(clk,
 
     # Assembling the SH2 assembly code
     def assemble_sh2(fn):
-        os.system("sh2elf-as -o {0}.o {0}.s".format(fn))
-        os.system("sh2elf-gcc -o {0}.elf -Wl,--section-start=.text=0 -nostartfiles -nostdlib {0}.o".format(fn))
+        os.system("sh2elf-as --little -o {0}.o {0}.s".format(fn))
+        os.system("sh2elf-gcc -ml -o {0}.elf -Wl,--section-start=.text=0 -nostartfiles -nostdlib {0}.o".format(fn))
         os.system("sh2elf-objcopy -O binary --only-section=.text {0}.elf {0}.bin".format(fn))
 
         f = open("{0}.bin".format(fn), 'rb')
@@ -136,7 +136,7 @@ def Toplevel(clk,
             addr = int(j2_inst_a)
             data = None
             if addr < len(j2code) / 2:
-                data = ord(j2code[addr * 2 + 1]) | (ord(j2code[addr * 2]) << 8)
+                data = ord(j2code[addr * 2]) | (ord(j2code[addr * 2 + 1]) << 8)
             if data is None:
                 print "ERROR J2 IREAD INVALID {:08X}".format(addr)
                 data = 0
@@ -161,18 +161,18 @@ def Toplevel(clk,
             if j2_db_rd:
                 data = None
                 if (addr + 3) < len(j2code):
-                    data = (ord(j2code[addr + 3]) |
-                            (ord(j2code[addr + 2]) << 8) |
-                            (ord(j2code[addr + 1]) << 16) |
-                            (ord(j2code[addr]) << 24))
+                    data = (ord(j2code[addr]) |
+                            (ord(j2code[addr + 1]) << 8) |
+                            (ord(j2code[addr + 2]) << 16) |
+                            (ord(j2code[addr + 3]) << 24))
                 elif (addr >= 0xbbbb0000 and
-                    addr < (0xbbbb0000 + len(shared_ram))):
+                    (addr + 3) < (0xbbbb0000 + len(shared_ram))):
                     # Shared RAM
                     addr -= 0xbbbb0000
-                    data = (shared_ram[addr + 3] |
-                            (shared_ram[addr + 2] << 8) |
-                            (shared_ram[addr + 1] << 16) |
-                            (shared_ram[addr] << 24))
+                    data = (shared_ram[addr] |
+                            (shared_ram[addr + 1] << 8) |
+                            (shared_ram[addr + 2] << 16) |
+                            (shared_ram[addr + 3] << 24))
 
                 if data is None:
                     print "ERROR J2 DREAD INVALID {:08X}".format(addr)
@@ -184,29 +184,29 @@ def Toplevel(clk,
                 j2_db_di.next = data
             if j2_db_wr:
                 if addr == 0xaaaa0000:
-                    if j2_db_we[3]:
+                    if j2_db_we[0]:
                         # Debug port
                         sys.stdout.write("\x1b[32m{:c}\x1b[39m".format(
                             datain & 0xFF))
                         sys.stdout.flush()
                 elif addr == 0xaaaa0004:
-                    if j2_db_we[3]:
+                    if j2_db_we[0]:
                         # AVR reset
                         if DEBUGPRINT:
                             print "POKED AVR RESET: {:08X}".format(datain)
                         avr_rst.next = (datain != 0)
                 elif (addr >= 0xbbbb0000 and
-                    addr < (0xbbbb0000 + len(shared_ram))):
+                    (addr + 3) < (0xbbbb0000 + len(shared_ram))):
                     # Shared RAM
                     addr -= 0xbbbb0000
                     if j2_db_we[0]:
-                        shared_ram[addr + 3] = (datain >>  0) & 0xFF
+                        shared_ram[addr + 0] = (datain >>  0) & 0xFF
                     if j2_db_we[1]:
-                        shared_ram[addr + 2] = (datain >>  8) & 0xFF
+                        shared_ram[addr + 1] = (datain >>  8) & 0xFF
                     if j2_db_we[2]:
-                        shared_ram[addr + 1] = (datain >> 16) & 0xFF
+                        shared_ram[addr + 2] = (datain >> 16) & 0xFF
                     if j2_db_we[3]:
-                        shared_ram[addr + 0] = (datain >> 24) & 0xFF
+                        shared_ram[addr + 3] = (datain >> 24) & 0xFF
                 else:
                     print ("ERROR J2 DWRITE INVALID {:08X} => {:08X}"
                         .format(datain, addr))
