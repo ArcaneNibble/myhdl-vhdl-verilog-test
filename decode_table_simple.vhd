@@ -25,6 +25,7 @@ begin
             x"00000001" when IMM_P1,
             x"00000002" when IMM_P2,
             x"00000004" when IMM_P4,
+            x"00000006" when IMM_P6,
             x"00000008" when IMM_P8,
             x"00000010" when IMM_P16,
             imms_8_0 when IMM_S_8_0,
@@ -4267,11 +4268,11 @@ begin
                 when x"0" =>
                     -- X = PC
                     ex.xbus_sel <= SEL_PC;
-                    -- Z = X + 0
+                    -- Z = X - 6
                     ex.aluiny_sel <= SEL_IMM;
                     ex_stall.zbus_sel <= SEL_ARITH;
-                    ex.arith_func <= ADD;
-                    imm_enum <= IMM_ZERO;
+                    ex.arith_func <= SUB;
+                    imm_enum <= IMM_P6;
                     -- PC = Z
                     ex_stall.wrpc_z <= '1';
 

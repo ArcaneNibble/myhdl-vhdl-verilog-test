@@ -16,7 +16,7 @@ package decode_pack is
     type aluinx_sel_t is (SEL_XBUS, SEL_FC, SEL_ROTCL, SEL_ZERO);
     type aluiny_sel_t is (SEL_YBUS, SEL_IMM, SEL_R0);
     type cpu_decode_type_t is (SIMPLE, REVERSE, MICROCODE);
-    type immval_t is (IMM_ZERO, IMM_P1, IMM_P2, IMM_P4, IMM_P8, IMM_P16, IMM_N16, IMM_N8, IMM_N2, IMM_N1, IMM_U_4_0, IMM_U_4_1, IMM_U_4_2, IMM_U_8_0, IMM_U_8_1, IMM_U_8_2, IMM_S_8_1, IMM_S_12_1, IMM_S_8_0);
+    type immval_t is (IMM_ZERO, IMM_P1, IMM_P2, IMM_P4, IMM_P6, IMM_P8, IMM_P16, IMM_N16, IMM_N8, IMM_N2, IMM_N1, IMM_U_4_0, IMM_U_4_1, IMM_U_4_2, IMM_U_8_0, IMM_U_8_1, IMM_U_8_2, IMM_S_8_1, IMM_S_12_1, IMM_S_8_0);
     type instruction_plane_t is (NORMAL_INSTR, SYSTEM_INSTR);
     type mac_busy_t is (NOT_BUSY, EX_NOT_STALL, WB_NOT_STALL, EX_BUSY, WB_BUSY);
     type macin1_sel_t is (SEL_XBUS, SEL_ZBUS, SEL_WBUS);

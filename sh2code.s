@@ -11,12 +11,13 @@ vectors:
     .long illegal_slot
 
 start:
-    /*.word 0*/
-    sett
+    .word 0
+    nop
+    clrt
     bt/s jumphere
-     ! bra jumphere
-     .word 0
-    .word 0xcccc
+     bra hexlut ! bullshit address for testing
+     ! .word 0
+     .word 0xcccc
     .long 0xaaaaaaaa
     .long 0xbbbbbbbb
 jumphere:
