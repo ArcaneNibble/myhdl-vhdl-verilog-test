@@ -158,6 +158,7 @@ def Toplevel(clk,
         if j2_db_en:
             addr = int(j2_db_a) & ~3
             datain = int(j2_db_do)
+            j2_db_ack.next = True
             if j2_db_rd:
                 data = None
                 if (addr + 3) < len(j2code):
@@ -173,6 +174,10 @@ def Toplevel(clk,
                             (shared_ram[addr + 2] << 8) |
                             (shared_ram[addr + 1] << 16) |
                             (shared_ram[addr] << 24))
+                elif addr == 0xcafe0000:
+                    print "J2 READ of NAK address"
+                    data = 0xdeadbeef
+                    j2_db_ack.next = False
 
                 if data is None:
                     print "ERROR J2 DREAD INVALID {:08X}".format(addr)
@@ -210,7 +215,6 @@ def Toplevel(clk,
                 else:
                     print ("ERROR J2 DWRITE INVALID {:08X} => {:08X}"
                         .format(datain, addr))
-            j2_db_ack.next = True
         else:
             j2_db_ack.next = False
 
