@@ -43,7 +43,8 @@ entity decode is
         pc : out pc_ctrl_t;
         reg : out reg_ctrl_t;
         slp : out std_logic;
-        sr : out sr_ctrl_t
+        sr : out sr_ctrl_t;
+        inst_nak : in std_logic
     );
 end;
 architecture arch of decode is
@@ -107,7 +108,8 @@ begin
             ilevel => sr.ilevel,
             incpc => pc.inc,
             next_id_stall => next_id_stall,
-            op => op
+            op => op,
+            inst_nak => inst_nak
         );
     table : decode_table
         port map (

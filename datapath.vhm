@@ -41,7 +41,8 @@ entity datapath is
 		     illegal_delay_slot : out std_logic;
 		     illegal_instr : out std_logic;
 		     delay_jump : in std_logic;
-		     delay_slot : in std_logic
+		     delay_slot : in std_logic;
+         inst_nak : out std_logic
 	     );
 end entity datapath;
 
@@ -224,6 +225,8 @@ begin
 	with mac.sel2 select macin2 <= ybus when SEL_YBUS, zbus when SEL_ZBUS, wbus when others;
 
 	ibit <= sr.int_mask;
+
+  inst_nak <= inst_i.nak;
 
 	datapath : process(this,pc_ctrl,wbus,zbus,sr_ctrl, xbus, ybus, mac,mem, instr, db_i, inst_i, debug, debug_i,reg_wr_data_o, logic_out, arith_out, arith_func, func, sfto)
 	  register this when clk='1' and clk'event reset when rst='1';

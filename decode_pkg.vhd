@@ -205,7 +205,8 @@ package decode_pack is
             pc : out pc_ctrl_t;
             reg : out reg_ctrl_t;
             slp : out std_logic;
-            sr : out sr_ctrl_t
+            sr : out sr_ctrl_t;
+            inst_nak : in std_logic
         );
     end component;
     component decode_core
@@ -242,7 +243,8 @@ package decode_pack is
             ilevel : out std_logic_vector(3 downto 0);
             incpc : out std_logic;
             next_id_stall : out std_logic;
-            op : out operation_t
+            op : out operation_t;
+            inst_nak : in std_logic
         );
     end component;
     component decode_table

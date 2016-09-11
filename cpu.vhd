@@ -44,6 +44,7 @@ architecture stru of cpu is
    signal illegal_instr : std_logic;
    signal delay_jump : std_logic;
    signal delay_slot : std_logic;
+   signal inst_nak : std_logic;
 begin
 
    event_o.ack  <= event_ack;
@@ -68,7 +69,8 @@ begin
       general_illegal_vec => general_illegal_vec,
       slot_illegal_vec => slot_illegal_vec,
       delay_jump_out => delay_jump,
-      delay_slot_out => delay_slot);
+      delay_slot_out => delay_slot,
+      inst_nak => inst_nak);
    u_mult : mult port map (clk => clk, rst => rst, slot => slot, a => mac_i, y => mac_o);
       mac_i.wr_m1 <= mac.com1; mac_i.command <= mac.com2;
       mac_i.wr_mach <= mac.wrmach; mac_i.wr_macl <= mac.wrmacl;
@@ -86,5 +88,6 @@ begin
       illegal_delay_slot => illegal_delay_slot,
       illegal_instr => illegal_instr,
       delay_jump => delay_jump,
-      delay_slot => delay_slot);
+      delay_slot => delay_slot,
+      inst_nak => inst_nak);
 end architecture stru;

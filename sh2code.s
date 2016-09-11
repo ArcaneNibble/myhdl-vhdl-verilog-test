@@ -20,6 +20,10 @@ start:
     nop
     nop
 
+    /* bad inst */
+    jmp @r0
+
+    /* bad data */
     mov.l @r0, r0
     mov #1, r1
     mov #2, r2
