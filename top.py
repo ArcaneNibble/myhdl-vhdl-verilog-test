@@ -126,7 +126,7 @@ def Toplevel(clk,
         os.system("sh2elf-objcopy -O binary --only-section=.text {0}.elf {0}.bin".format(fn))
 
         f = open("{0}.bin".format(fn), 'rb')
-        data = f.read()
+        data = f.read()[:-14] # HACK
         f.close()
         return data
     j2code = assemble_sh2("sh2code")
@@ -143,7 +143,7 @@ def Toplevel(clk,
                 data = ord(j2code[addr * 2 + 1]) | (ord(j2code[addr * 2]) << 8)
             if data is None:
                 print "ERROR J2 IREAD INVALID {:08X}".format(addr)
-                data = 0
+                data = 0xffff
                 j2_inst_ack.next = False
                 j2_inst_nak.next = True
             else:
