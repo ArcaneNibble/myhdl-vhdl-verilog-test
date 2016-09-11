@@ -33,6 +33,7 @@ def Toplevel(clk,
              j2_db_lock,
              j2_db_di,
              j2_db_ack,
+             j2_db_nak,
              j2_inst_en,
              j2_inst_a,
              j2_inst_jp,
@@ -159,6 +160,7 @@ def Toplevel(clk,
             addr = int(j2_db_a) & ~3
             datain = int(j2_db_do)
             j2_db_ack.next = True
+            j2_db_nak.next = False
             if j2_db_rd:
                 data = None
                 if (addr + 3) < len(j2code):
@@ -178,6 +180,7 @@ def Toplevel(clk,
                     print "J2 READ of NAK address"
                     data = 0xdeadbeef
                     j2_db_ack.next = False
+                    j2_db_nak.next = True
 
                 if data is None:
                     print "ERROR J2 DREAD INVALID {:08X}".format(addr)
@@ -295,6 +298,7 @@ def jcore(clk,
           db_lock,
           db_di,
           db_ack,
+          db_nak,
           inst_en,
           inst_a,
           inst_jp,
@@ -336,6 +340,7 @@ def jcore(clk,
         to_myhdl_db_lock=db_lock,
         from_myhdl_db_di=db_di,
         from_myhdl_db_ack=db_ack,
+        from_myhdl_db_nak=db_nak,
         to_myhdl_inst_en=inst_en,
         to_myhdl_inst_a=inst_a,
         to_myhdl_inst_jp=inst_jp,
@@ -388,6 +393,7 @@ j2_db_do = Signal(intbv(0)[32:])
 j2_db_lock = Signal(False)
 j2_db_di = Signal(intbv(0)[32:])
 j2_db_ack = Signal(False)
+j2_db_nak = Signal(False)
 j2_inst_en = Signal(False)
 j2_inst_a = Signal(intbv(0)[32:1])
 j2_inst_jp = Signal(False)
@@ -438,6 +444,7 @@ toplevel_inst = Toplevel(
     j2_db_lock,
     j2_db_di,
     j2_db_ack,
+    j2_db_nak,
     j2_inst_en,
     j2_inst_a,
     j2_inst_jp,
@@ -489,6 +496,7 @@ j2_inst = jcore(
     j2_db_lock,
     j2_db_di,
     j2_db_ack,
+    j2_db_nak,
     j2_inst_en,
     j2_inst_a,
     j2_inst_jp,

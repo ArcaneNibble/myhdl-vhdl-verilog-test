@@ -19,6 +19,7 @@ architecture arch of dut_jcore_cpu is
             db_lock     : out std_logic;
             db_di       : in  std_logic_vector(31 downto 0);
             db_ack      : in  std_logic;
+            db_nak      : in  std_logic;
 
             inst_en     : out std_logic;
             inst_a      : out std_logic_vector(31 downto 1);
@@ -50,6 +51,7 @@ architecture arch of dut_jcore_cpu is
     signal from_myhdl_rst         : std_logic;
     signal from_myhdl_db_di       : std_logic_vector(31 downto 0);
     signal from_myhdl_db_ack      : std_logic;
+    signal from_myhdl_db_nak      : std_logic;
     signal from_myhdl_inst_d      : std_logic_vector(15 downto 0);
     signal from_myhdl_inst_ack    : std_logic;
     signal from_myhdl_debug_en    : std_logic;
@@ -93,6 +95,7 @@ begin
         db_lock     => to_myhdl_db_lock,
         db_di       => from_myhdl_db_di,
         db_ack      => from_myhdl_db_ack,
+        db_nak      => from_myhdl_db_nak,
 
         inst_en     => to_myhdl_inst_en,
         inst_a      => to_myhdl_inst_a,

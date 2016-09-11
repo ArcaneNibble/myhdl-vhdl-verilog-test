@@ -16,6 +16,7 @@ entity jcore_cpu is
         db_lock     : out std_logic;
         db_di       : in  std_logic_vector(31 downto 0);
         db_ack      : in  std_logic;
+        db_nak      : in  std_logic;
 
         inst_en     : out std_logic;
         inst_a      : out std_logic_vector(31 downto 1);
@@ -101,10 +102,11 @@ begin
     end process;
 
     --- XXX WHY ARE THESE NEEDED??
-    process(db_di, db_ack)
+    process(db_di, db_ack, db_nak)
     begin
         db_i_xxx.d <= db_di;
         db_i_xxx.ack <= db_ack;
+        db_i_xxx.nak <= db_nak;
     end process;
 
     process(inst_d, inst_ack)

@@ -29,6 +29,7 @@ package cpu2j0_pack is
    type cpu_data_i_t is record
       d    : std_logic_vector(31 downto 0);
       ack  : std_logic;
+      nak  : std_logic;
    end record;
 
    type cpu_debug_o_t is record
