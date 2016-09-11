@@ -39,6 +39,7 @@ def Toplevel(clk,
              j2_inst_jp,
              j2_inst_d,
              j2_inst_ack,
+             j2_inst_nak,
              j2_debug_ack,
              j2_debug_do,
              j2_debug_rdy,
@@ -136,19 +137,23 @@ def Toplevel(clk,
         if j2_inst_en:
             addr = int(j2_inst_a)
             data = None
+            j2_inst_ack.next = True
+            j2_inst_nak.next = False
             if addr < len(j2code) / 2:
                 data = ord(j2code[addr * 2 + 1]) | (ord(j2code[addr * 2]) << 8)
             if data is None:
                 print "ERROR J2 IREAD INVALID {:08X}".format(addr)
                 data = 0
+                j2_inst_ack.next = False
+                j2_inst_nak.next = True
             else:
                 if DEBUGPRINT:
                     print "J2 IRAM {:08X} => {:04X}".format(addr, data)
 
             j2_inst_d.next = data
-            j2_inst_ack.next = True
         else:
             j2_inst_ack.next = False
+            j2_inst_nak.next = False
 
     # Shared RAM (including AVR stack)
     shared_ram = [0] * 256
@@ -304,6 +309,7 @@ def jcore(clk,
           inst_jp,
           inst_d,
           inst_ack,
+          inst_nak,
           debug_ack,
           debug_do,
           debug_rdy,
@@ -346,6 +352,7 @@ def jcore(clk,
         to_myhdl_inst_jp=inst_jp,
         from_myhdl_inst_d=inst_d,
         from_myhdl_inst_ack=inst_ack,
+        from_myhdl_inst_nak=inst_nak,
         to_myhdl_debug_ack=debug_ack,
         to_myhdl_debug_do=debug_do,
         to_myhdl_debug_rdy=debug_rdy,
@@ -399,6 +406,7 @@ j2_inst_a = Signal(intbv(0)[32:1])
 j2_inst_jp = Signal(False)
 j2_inst_d = Signal(intbv(0)[16:])
 j2_inst_ack = Signal(False)
+j2_inst_nak = Signal(False)
 j2_debug_ack = Signal(False)
 j2_debug_do = Signal(intbv(0)[32:])
 j2_debug_rdy = Signal(False)
@@ -450,6 +458,7 @@ toplevel_inst = Toplevel(
     j2_inst_jp,
     j2_inst_d,
     j2_inst_ack,
+    j2_inst_nak,
     j2_debug_ack,
     j2_debug_do,
     j2_debug_rdy,
@@ -502,6 +511,7 @@ j2_inst = jcore(
     j2_inst_jp,
     j2_inst_d,
     j2_inst_ack,
+    j2_inst_nak,
     j2_debug_ack,
     j2_debug_do,
     j2_debug_rdy,

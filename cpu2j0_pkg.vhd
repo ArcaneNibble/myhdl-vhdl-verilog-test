@@ -14,6 +14,7 @@ package cpu2j0_pack is
    type cpu_instruction_i_t is record
       d    : std_logic_vector(15 downto 0);
       ack  : std_logic;
+      nak  : std_logic;
    end record;
 
    type cpu_data_o_t is record

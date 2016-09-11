@@ -26,6 +26,7 @@ architecture arch of dut_jcore_cpu is
             inst_jp     : out std_logic;
             inst_d      : in  std_logic_vector(15 downto 0);
             inst_ack    : in  std_logic;
+            inst_nak    : in  std_logic;
 
             debug_ack   : out std_logic;
             debug_do    : out std_logic_vector(31 downto 0);
@@ -54,6 +55,7 @@ architecture arch of dut_jcore_cpu is
     signal from_myhdl_db_nak      : std_logic;
     signal from_myhdl_inst_d      : std_logic_vector(15 downto 0);
     signal from_myhdl_inst_ack    : std_logic;
+    signal from_myhdl_inst_nak    : std_logic;
     signal from_myhdl_debug_en    : std_logic;
     signal from_myhdl_debug_cmd   : std_logic_vector(1 downto 0);
     signal from_myhdl_debug_ir    : std_logic_vector(15 downto 0);
@@ -102,6 +104,7 @@ begin
         inst_jp     => to_myhdl_inst_jp,
         inst_d      => from_myhdl_inst_d,
         inst_ack    => from_myhdl_inst_ack,
+        inst_nak    => from_myhdl_inst_nak,
 
         debug_ack   => to_myhdl_debug_ack,
         debug_do    => to_myhdl_debug_do,

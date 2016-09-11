@@ -23,6 +23,7 @@ entity jcore_cpu is
         inst_jp     : out std_logic;
         inst_d      : in  std_logic_vector(15 downto 0);
         inst_ack    : in  std_logic;
+        inst_nak    : in  std_logic;
 
         debug_ack   : out std_logic;
         debug_do    : out std_logic_vector(31 downto 0);
@@ -109,10 +110,11 @@ begin
         db_i_xxx.nak <= db_nak;
     end process;
 
-    process(inst_d, inst_ack)
+    process(inst_d, inst_ack, inst_nak)
     begin
         inst_i_xxx.d <= inst_d;
         inst_i_xxx.ack <= inst_ack;
+        inst_i_xxx.nak <= inst_nak;
     end process;
 
     process(debug_en, debug_cmd_typed, debug_ir, debug_di, debug_d_en)
