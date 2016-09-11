@@ -21,7 +21,10 @@ start:
     nop
 
     /* bad inst */
-    jmp @r0
+    /*jmp @r0
+     nop*/
+    bra the_end
+     nop
 
     /* bad data */
     mov.l @r0, r0
@@ -74,3 +77,6 @@ sh2_illegal_normal_msg:
 .align 4
 sh2_illegal_slot_msg:
     .asciz "SH2 ILLEGAL SLOT HAPPENED!"
+
+.align 2
+the_end:

@@ -265,7 +265,7 @@ begin
             this.data_o := NULL_DATA_O;
           end if;
           -- check if instruction bus transaction finished
-          if this.inst_o.en = '1' and inst_i.ack = '1' then
+          if this.inst_o.en = '1' and (inst_i.ack = '1' or inst_i.nak = '1') then
             this.if_dr_next := inst_i.d;
             this.if_en      := '1';
             this.inst_o := NULL_INST_O;
