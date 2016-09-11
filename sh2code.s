@@ -22,16 +22,12 @@ start:
     nop
     nop
 
-    /* bad inst */
-    /*jmp @r0
-     nop*/
-    bra the_end
-     nop
-
     /* bad data */
-    /*mov.l @r0, r0
+    mov.l @r0, r0
     mov #1, r1
-    mov #2, r2*/
+    mov #2, r2
+    mov #3, r3
+    mov #4, r4
 
 loop:
     bra loop
@@ -101,9 +97,3 @@ sh2_illegal_jump_msg:
 .align 4
 sh2_illegal_fetch_msg:
     .asciz "SH2 ILLEGAL IFETCH HAPPENED!"
-
-.align 4
-the_end:
-    bra the_really_end
-     nop 
-the_really_end:
