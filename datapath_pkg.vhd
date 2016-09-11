@@ -53,6 +53,7 @@ package datapath_pack is
       illegal_instr : out std_logic;
       delay_jump : in std_logic;
       delay_slot : in std_logic;
-      inst_nak   : out std_logic);
+      inst_nak   : out std_logic;
+      data_nak   : out std_logic);
    end component datapath;
 end package;

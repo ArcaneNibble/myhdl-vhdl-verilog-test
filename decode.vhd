@@ -44,7 +44,8 @@ entity decode is
         reg : out reg_ctrl_t;
         slp : out std_logic;
         sr : out sr_ctrl_t;
-        inst_nak : in std_logic
+        inst_nak : in std_logic;
+        data_nak : in std_logic
     );
 end;
 architecture arch of decode is
@@ -109,7 +110,8 @@ begin
             incpc => pc.inc,
             next_id_stall => next_id_stall,
             op => op,
-            inst_nak => inst_nak
+            inst_nak => inst_nak,
+            data_nak => data_nak
         );
     table : decode_table
         port map (

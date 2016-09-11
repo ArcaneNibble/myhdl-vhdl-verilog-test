@@ -206,7 +206,8 @@ package decode_pack is
             reg : out reg_ctrl_t;
             slp : out std_logic;
             sr : out sr_ctrl_t;
-            inst_nak : in std_logic
+            inst_nak : in std_logic;
+            data_nak : in std_logic
         );
     end component;
     component decode_core
@@ -244,7 +245,8 @@ package decode_pack is
             incpc : out std_logic;
             next_id_stall : out std_logic;
             op : out operation_t;
-            inst_nak : in std_logic
+            inst_nak : in std_logic;
+            data_nak : in std_logic
         );
     end component;
     component decode_table
