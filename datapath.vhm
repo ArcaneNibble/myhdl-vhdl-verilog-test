@@ -258,7 +258,7 @@ begin
           this.old_debug := debug;
 
           -- check if data bus transaction finished
-          if this.data_o.en = '1' and db_i.ack = '1' then
+          if this.data_o.en = '1' and (db_i.ack = '1' or db_i.nak = '1') then
             -- FIXME: Drop en, unless keep_cyc='1'
             this.m_dr_next := align_read_data(db_i.d, this.data_o, this.data_o_size);
             this.m_en      := '1';

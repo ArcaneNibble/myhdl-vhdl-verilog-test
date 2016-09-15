@@ -178,6 +178,12 @@ begin
     -- XXX FIXME: Off by 2 on saved address?
     system_op(GENERAL_ILLEGAL, x"07")
       when inst_nak = '1' else
+    -- Data fetch error for opcode in delay slot
+    system_op(SLOT_ILLEGAL, x"0a")
+      when delay_slot = '1' and data_nak = '1' else
+    -- Data fetch error for opcode not in delay slot
+    system_op(GENERAL_ILLEGAL, x"09")
+      when data_nak = '1' else
     -- Break Instruction
     system_op(BREAK)
       when delay_slot = '0' and enter_debug = '1' else

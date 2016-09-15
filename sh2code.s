@@ -9,8 +9,10 @@ vectors:
     .long illegal_normal
     .long 0
     .long illegal_slot
-    .long illegal_fetch
+    .long illegal_ifetch
     .long illegal_jump
+    .long illegal_dfetch_notslot
+    .long illegal_dfetch_slot
 
 start:
     mova nak_addr, r0
@@ -54,11 +56,25 @@ loop4:
     bra loop4
      nop
 
-illegal_fetch:
+illegal_ifetch:
     bsr print
-     mova sh2_illegal_fetch_msg, r0
+     mova sh2_illegal_ifetch_msg, r0
 loop5:
     bra loop5
+     nop
+
+illegal_dfetch_notslot:
+    bsr print
+     mova sh2_illegal_dfetch_notslot_msg, r0
+loop6:
+    bra loop6
+     nop
+
+illegal_dfetch_slot:
+    bsr print
+     mova sh2_illegal_dfetch_slot_msg, r0
+loop7:
+    bra loop7
      nop
 
 /* r0 = str */
@@ -95,5 +111,13 @@ sh2_illegal_jump_msg:
     .asciz "SH2 ILLEGAL JUMP TARGET HAPPENED!"
 
 .align 4
-sh2_illegal_fetch_msg:
+sh2_illegal_ifetch_msg:
     .asciz "SH2 ILLEGAL IFETCH HAPPENED!"
+
+.align 4
+sh2_illegal_dfetch_notslot_msg:
+    .asciz "SH2 ILLEGAL DFETCH (NOT SLOT) HAPPENED!"
+
+.align 4
+sh2_illegal_dfetch_slot_msg:
+    .asciz "SH2 ILLEGAL DFETCH (SLOT) HAPPENED!"
