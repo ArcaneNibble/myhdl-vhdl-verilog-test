@@ -61,6 +61,20 @@ architecture stru of datapath is
 
 	signal delay_slot_delay : std_logic;
 
+  -- These signals are used in data nak handling. They are used to inhibit
+  -- the "wrong" side effects of instructions following the one that triggered
+  -- the nak. This is a huge violation of abstraction barriers because these
+  -- are control signals.
+
+  -- Kills EX stage of next opcode
+  signal nak_kill_1 : std_logic;
+  -- Kills WB stage of fault opcode
+  signal nak_kill_2 : std_logic;
+
+  -- Regfile write signals after being killed
+  signal we_wb_killed : std_logic;
+  signal we_ex_killed : std_logic;
+
         signal div1_arith_func : arith_func_t;
         signal arith_func : arith_func_t;
         signal arith_out : std_logic_vector(32 downto 0);
@@ -158,6 +172,22 @@ architecture stru of datapath is
           return r;
         end align_read_data;
 begin
+  -- This logic here generates the "kill" signals to deactivate side effects
+  -- after a data fetch nak
+  -- FIXME this signal is the same as data_nak
+  nak_kill_1 <= this'register.data_o.en and db_i.nak;
+  process(clk)
+  begin
+    if rising_edge(clk) then
+      -- FIXME FIXME CHECK THIS LOGIC WITH SLOT!!!
+      if slot_o = '1' then
+        nak_kill_2 <= nak_kill_1;
+      end if;
+    end if;
+  end process;
+
+  we_wb_killed <= reg.wr_w and not nak_kill_2;
+  we_ex_killed <= reg.wr_z and not nak_kill_1;
 
   -- This logic here is used to fix PC-relative instructions in a branch
   -- delay slot. When delay_jump is active is when pc contains the value
@@ -190,8 +220,8 @@ begin
                        REG_WIDTH => 32)
           port map(clk => clk, rst => rst, ce => slot_o, addr_ra => reg.num_x, dout_a => reg_x,
                    addr_rb => reg.num_y, dout_b => reg_y, dout_0 => reg_0,
-                   we_wb => reg.wr_w, w_addr_wb => reg.num_w, din_wb => wbus, 
-                   we_ex => reg.wr_z, w_addr_ex => reg.num_z, din_ex => gpf_zwd,
+                   we_wb => we_wb_killed, w_addr_wb => reg.num_w, din_wb => wbus, 
+                   we_ex => we_ex_killed, w_addr_ex => reg.num_z, din_ex => gpf_zwd,
                    wr_data_o => reg_wr_data_o);
 -- setup arithmetic inputs function
 	with func.alu.inx_sel select
@@ -228,8 +258,8 @@ begin
 
 	ibit <= sr.int_mask;
 
-  inst_nak <= inst_i.nak;
-  data_nak <= db_i.nak;
+  inst_nak <= this'register.inst_o.en and inst_i.nak;
+  data_nak <= this'register.data_o.en and db_i.nak;
 
 	datapath : process(this,pc_ctrl,wbus,zbus,sr_ctrl, xbus, ybus, mac,mem, instr, db_i, inst_i, debug, debug_i,reg_wr_data_o, logic_out, arith_out, arith_func, func, sfto)
 	  register this when clk='1' and clk'event reset when rst='1';
