@@ -66,10 +66,13 @@ architecture stru of datapath is
   -- the nak. This is a huge violation of abstraction barriers because these
   -- are control signals.
 
-  -- Kills EX stage of next opcode
+  -- Kills EX stage of next opcode and MA stage of next opcode
+  -- (if there is a MA stage)
   signal nak_kill_1 : std_logic;
   -- Kills WB stage of fault opcode
   signal nak_kill_2 : std_logic;
+  -- Kills WB stage of next opcode (if there is a WB stage)
+  signal nak_kill_3 : std_logic;
 
   -- Regfile write signals after being killed
   signal we_wb_killed : std_logic;
@@ -182,11 +185,12 @@ begin
       -- FIXME FIXME CHECK THIS LOGIC WITH SLOT!!!
       if slot_o = '1' then
         nak_kill_2 <= nak_kill_1;
+        nak_kill_3 <= nak_kill_2;
       end if;
     end if;
   end process;
 
-  we_wb_killed <= reg.wr_w and not nak_kill_2;
+  we_wb_killed <= reg.wr_w and not nak_kill_2 and not nak_kill_3;
   we_ex_killed <= reg.wr_z and not nak_kill_1;
 
   -- This logic here is used to fix PC-relative instructions in a branch
@@ -261,7 +265,7 @@ begin
   inst_nak <= this'register.inst_o.en and inst_i.nak;
   data_nak <= this'register.data_o.en and db_i.nak;
 
-	datapath : process(this,pc_ctrl,wbus,zbus,sr_ctrl, xbus, ybus, mac,mem, instr, db_i, inst_i, debug, debug_i,reg_wr_data_o, logic_out, arith_out, arith_func, func, sfto)
+	datapath : process(this,pc_ctrl,wbus,zbus,sr_ctrl, xbus, ybus, mac,mem, instr, db_i, inst_i, debug, debug_i,reg_wr_data_o, logic_out, arith_out, arith_func, func, sfto, nak_kill_1)
 	  register this when clk='1' and clk'event reset when rst='1';
           variable if_ad : std_logic_vector(31 downto 0);
           variable ma_ad, ma_dw : std_logic_vector(31 downto 0);
@@ -362,7 +366,7 @@ begin
 
           if this.slot = '1' then
             -- start new memory transactions
-            if mem.issue = '1' and this.data_o.en = '0' then
+            if mem.issue = '1' and nak_kill_1 = '0' and this.data_o.en = '0' then
               -- start new data request
               case mem.addr_sel is
                 when SEL_XBUS => ma_ad := xbus;

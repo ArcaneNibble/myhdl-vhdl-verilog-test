@@ -15,6 +15,8 @@ vectors:
     .long illegal_dfetch_slot
 
 start:
+    mova start, r0
+    mov r0, r1
     mova nak_addr, r0
     mov.l @r0, r0
 
@@ -27,6 +29,7 @@ start:
     /* bad data */
     mov.l @r0, r0
     mov #1, r1
+    /*mov.l @r1, r1*/
     mov #2, r2
     mov #3, r3
     mov #4, r4
