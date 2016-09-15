@@ -172,6 +172,7 @@ begin
         pc_delay_save <= std_logic_vector(unsigned(pc)+2);
       end if;
 
+      -- FIXME!!! What if the CPU is stalled? Test stalling more reliably!
       delay_slot_delay <= delay_slot;
     end if;
   end process;

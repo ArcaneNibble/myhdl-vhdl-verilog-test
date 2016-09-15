@@ -56,6 +56,12 @@ architecture arch of decode_core is
   signal next_id_stall_a : std_logic;
   signal maskint : std_logic;
   signal delay_slot : std_logic;
+  -- The delay_jump signal corresponds to the "IF" stage of an opcode.
+  -- The delay_slot signal corresponds to the "ID" stage of an opcode.
+  -- These extra signals are needed to correctly detect data aborts that happen
+  -- in a delay slot.
+  signal delay_slot_ex : std_logic;
+  signal delay_slot_ma : std_logic;
 
   register variable this : decode_core_reg_t reset := reset_vector;
 
@@ -136,6 +142,18 @@ begin
     end if;
   end process;
 
+  process(clk)
+  begin
+    if rising_edge(clk) then
+      if slot = '1' then
+        -- This set of ugly coding style violations are used to shift the
+        -- delay_slot signal to the desired pipeline location.
+        delay_slot_ex <= delay_slot;
+        delay_slot_ma <= delay_slot_ex;
+      end if;
+    end if;
+  end process;
+
   delay_slot_out <= delay_slot;
 
   maskint <= this'register.maskint;
@@ -179,9 +197,11 @@ begin
     system_op(GENERAL_ILLEGAL, x"07")
       when inst_nak = '1' else
     -- Data fetch error for opcode in delay slot
+    -- XXX FIXME: Totally saves the wrong address
     system_op(SLOT_ILLEGAL, x"0a")
-      when delay_slot = '1' and data_nak = '1' else
+      when delay_slot_ma = '1' and data_nak = '1' else
     -- Data fetch error for opcode not in delay slot
+    -- XXX FIXME: Wrong address saved (Off by 4?)
     system_op(GENERAL_ILLEGAL, x"09")
       when data_nak = '1' else
     -- Break Instruction
