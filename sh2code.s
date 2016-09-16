@@ -27,8 +27,10 @@ start:
     nop
 
     /* bad data */
-    mov.l @r0, r0
-    mov #1, r1
+    .word 0x2003 /* cas.l r0, r0, @r0 */
+    /*mov.l @r0, r0*/
+    trapa #0xAA
+    /*mov #1, r1*/
     /*mov.l @r1, r1*/
     mov #2, r2
     mov #3, r3
