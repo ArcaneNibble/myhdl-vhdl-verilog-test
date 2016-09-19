@@ -18,7 +18,9 @@ package datapath_pack is
    constant Q   : integer range 0 to 9 := 8;
    constant M   : integer range 0 to 9 := 9;
 
-   component datapath is port (
+   component datapath is generic(
+      endian      : cpu_endian_t
+   ); port (
       clk         : in  std_logic;
       rst         : in  std_logic;
       debug       : in  std_logic;

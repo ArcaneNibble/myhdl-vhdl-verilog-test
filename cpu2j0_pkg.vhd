@@ -70,7 +70,11 @@ package cpu2j0_pack is
       dbg  : std_logic;
    end record;
 
-   component cpu is port (
+   type cpu_endian_t is (BIG, LITTLE);
+
+   component cpu is generic(
+      endian       : cpu_endian_t := BIG
+   ); port (
       clk          : in  std_logic;
       rst          : in  std_logic;
       db_o         : out cpu_data_o_t;
@@ -82,8 +86,8 @@ package cpu2j0_pack is
       debug_i      : in  cpu_debug_i_t;
       event_o      : out cpu_event_o_t;
       event_i      : in  cpu_event_i_t;
-      general_illegal_vec : in std_logic_vector(7 downto 0);
-      slot_illegal_vec    : in std_logic_vector(7 downto 0));
+      general_illegal_vec : in std_logic_vector(7 downto 0) := x"04";
+      slot_illegal_vec    : in std_logic_vector(7 downto 0) := x"06");
    end component cpu;
 
    function loopback_bus(b : cpu_data_o_t) return cpu_data_i_t;

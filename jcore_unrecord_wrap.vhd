@@ -131,7 +131,9 @@ begin
         event_i_xxx.lvl <= event_lvl_i;
     end process;
 
-    jcore: configuration work.cpu_fpga port map (
+    jcore: configuration work.cpu_fpga generic map(
+        endian => LITTLE
+    ) port map (
         clk => clk,
         rst => rst,
         db_o.en => db_en,

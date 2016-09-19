@@ -7,7 +7,9 @@ use work.datapath_pack.all;
 use work.decode_pack.all;
 
 entity datapath is 
-	port (
+  generic (
+         endian : cpu_endian_t
+  ); port (
 		     clk : in std_logic;
 		     rst : in std_logic;
 		     debug : in std_logic;
@@ -98,23 +100,43 @@ architecture stru of datapath is
             r.a := addr;
             -- for writes, prepare we and d signals
             if mem.wr = '1' then
-              case mem.size is
-                when LONG =>
-                  r.d := data;          r.we := "1111";
-                when WORD =>
-                  if addr(1) = '0' then r.we := "0011"; 
-                  else                  r.we := "1100"; end if;
-                  r.d := data(15 downto 0) & data(15 downto 0);
-                when BYTE =>
-                  -- TODO: Use shift or rotate operator instead of case?
-                  case addr(1 downto 0) is
-                    when "00" =>        r.we := "0001";
-                    when "01" =>        r.we := "0010";
-                    when "10" =>        r.we := "0100";
-                    when others =>      r.we := "1000";
-                  end case;
-                  r.d := data(7 downto 0) & data(7 downto 0) & data(7 downto 0) & data(7 downto 0);
-              end case;
+              if endian = BIG then
+                case mem.size is
+                  when LONG =>
+                    r.d := data;          r.we := "1111";
+                  when WORD =>
+                    if addr(1) = '0' then r.we := "1100"; 
+                    else                  r.we := "0011"; end if;
+                    r.d := data(15 downto 0) & data(15 downto 0);
+                  when BYTE =>
+                    -- TODO: Use shift or rotate operator instead of case?
+                    case addr(1 downto 0) is
+                      when "00" =>        r.we := "1000";
+                      when "01" =>        r.we := "0100";
+                      when "10" =>        r.we := "0010";
+                      when others =>      r.we := "0001";
+                    end case;
+                    r.d := data(7 downto 0) & data(7 downto 0) & data(7 downto 0) & data(7 downto 0);
+                end case;
+              else
+                case mem.size is
+                  when LONG =>
+                    r.d := data;          r.we := "1111";
+                  when WORD =>
+                    if addr(1) = '0' then r.we := "0011"; 
+                    else                  r.we := "1100"; end if;
+                    r.d := data(15 downto 0) & data(15 downto 0);
+                  when BYTE =>
+                    -- TODO: Use shift or rotate operator instead of case?
+                    case addr(1 downto 0) is
+                      when "00" =>        r.we := "0001";
+                      when "01" =>        r.we := "0010";
+                      when "10" =>        r.we := "0100";
+                      when others =>      r.we := "1000";
+                    end case;
+                    r.d := data(7 downto 0) & data(7 downto 0) & data(7 downto 0) & data(7 downto 0);
+                end case;
+              end if;
             end if;
           end if;
           return r;
@@ -138,21 +160,39 @@ architecture stru of datapath is
         return std_logic_vector is
           variable r : std_logic_vector(31 downto 0);
         begin
-          case size is
-            when BYTE   =>
-              case bus_o.a(1 downto 0) is
-                when "00"   => r := to_slv(d( 7), 24) & d( 7 downto  0);
-                when "01"   => r := to_slv(d(15), 24) & d(15 downto  8);
-                when "10"   => r := to_slv(d(23), 24) & d(23 downto 16);
-                when others => r := to_slv(d(31), 24) & d(31 downto 24);
-              end case;
-            when WORD   =>
-              case bus_o.a(1) is
-                when '0'    => r := to_slv(d(15), 16) & d(15 downto  0);
-                when others => r := to_slv(d(31), 16) & d(31 downto 16);
-              end case;
-            when others =>     r := d;
-          end case;
+          if endian = BIG then
+            case size is
+              when BYTE   =>
+                case bus_o.a(1 downto 0) is
+                  when "00"   => r := to_slv(d(31), 24) & d(31 downto 24);
+                  when "01"   => r := to_slv(d(23), 24) & d(23 downto 16);
+                  when "10"   => r := to_slv(d(15), 24) & d(15 downto  8);
+                  when others => r := to_slv(d( 7), 24) & d( 7 downto  0);
+                end case;
+              when WORD   =>
+                case bus_o.a(1) is
+                  when '0'    => r := to_slv(d(31), 16) & d(31 downto 16);
+                  when others => r := to_slv(d(15), 16) & d(15 downto  0);
+                end case;
+              when others =>     r := d;
+            end case;
+          else
+            case size is
+              when BYTE   =>
+                case bus_o.a(1 downto 0) is
+                  when "00"   => r := to_slv(d( 7), 24) & d( 7 downto  0);
+                  when "01"   => r := to_slv(d(15), 24) & d(15 downto  8);
+                  when "10"   => r := to_slv(d(23), 24) & d(23 downto 16);
+                  when others => r := to_slv(d(31), 24) & d(31 downto 24);
+                end case;
+              when WORD   =>
+                case bus_o.a(1) is
+                  when '0'    => r := to_slv(d(15), 16) & d(15 downto  0);
+                  when others => r := to_slv(d(31), 16) & d(31 downto 16);
+                end case;
+              when others =>     r := d;
+            end case;
+          end if;
           return r;
         end align_read_data;
 begin
