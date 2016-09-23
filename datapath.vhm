@@ -227,7 +227,7 @@ begin
 
 	ibit <= sr.int_mask;
 
-  inst_nak <= inst_i.nak;
+  inst_nak <= this'register.if_nak;
   data_nak <= db_i.nak;
 
 	datapath : process(this,pc_ctrl,wbus,zbus,sr_ctrl, xbus, ybus, mac,mem, instr, db_i, inst_i, debug, debug_i,reg_wr_data_o, logic_out, arith_out, arith_func, func, sfto)
@@ -266,8 +266,9 @@ begin
           end if;
           -- check if instruction bus transaction finished
           if this.inst_o.en = '1' and (inst_i.ack = '1' or inst_i.nak = '1') then
-            this.if_dr_next := inst_i.d;
-            this.if_en      := '1';
+            this.if_dr_next  := inst_i.d;
+            this.if_nak_next := inst_i.nak;
+            this.if_en       := '1';
             this.inst_o := NULL_INST_O;
           elsif this.debug_state = READY and debug_i.en = '1' then
             -- handle debug command
@@ -277,8 +278,9 @@ begin
                 this.debug_o.ack := '1'; 
               when INSERT =>
                 -- use the instruction from the debug register
-                this.if_dr_next := debug_i.ir;
-                this.if_en      := '1';
+                this.if_dr_next  := debug_i.ir;
+                this.if_nak_next := '0';
+                this.if_en       := '1';
                 this.stop_pc_inc := '1';
                 -- latch the y-bus override into start of pipeline
                 this.ybus_override(this.ybus_override'left) := ( en => debug_i.d_en, d => debug_i.d );
@@ -317,6 +319,7 @@ begin
             end if;
             if this.if_en = '1' then
               this.if_dr := this.if_dr_next;
+              this.if_nak := this.if_nak_next;
               this.illegal_delay_slot := check_illegal_delay_slot(this.if_dr);
               this.illegal_instr := check_illegal_instruction(this.if_dr);
               this.if_en := '0';
